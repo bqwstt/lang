@@ -22,7 +22,9 @@
 #ifndef PARSE_H
 #define PARSE_H
 
-#define PARSER_NODE_LIMIT 2048
+// @TODO: may want to use dynamic alloc
+#define PARSER_NODE_LIMIT 131072
+static byte * node_buffer[PARSER_NODE_LIMIT];
 
 typedef struct
 {
@@ -33,13 +35,27 @@ typedef struct
     token_t next_token;
 } parser_t;
 
+typedef enum
+{
+    ASSOC_UNKNOWN,
+    ASSOC_RIGHT,
+    ASSOC_LEFT,
+} op_assoc_t;
+
 parser_t parser_create(lexer_t * lexer);
 void parser_destroy(parser_t * parser);
 void parser_consume_token(parser_t * parser);
 void parser_parse(parser_t * parser);
-void parser_parse_program(parser_t * parser);
 
+/* Helpers */
+boolean parser_kind_is_operator(token_kind_t kind);
+uint parser_operator_precedence(token_kind_t op);
+op_assoc_t parser_operator_associativity(token_kind_t op);
+
+/* Parsing functions */
 ast_statement_t * parser_parse_statement(parser_t * parser);
-ast_binary_op_t * parser_parse_binary_op(parser_t * parser);
+ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, arena_t * scratch);
+
+void parser_dump_ast(parser_t * parser, ast_program_t * root);
 
 #endif // PARSE_H

@@ -24,27 +24,40 @@
 
 typedef enum
 {
-    TK_EOF,
+    TK_UNKNOWN,
 
     TK_SEP,
     TK_MINUS,
     TK_PLUS,
     TK_MULT,
     TK_DIV,
+
+    TK_NUMBER,
+
+    TK_ILLEGAL,
+    TK_EOF,
 } token_kind_t;
 
 static const char * token_names[] = {
-    [TK_EOF] = "end of file",
+    [TK_ILLEGAL] = "illegal",
+
     [TK_SEP] = "separation",
     [TK_MINUS] = "minus",
     [TK_PLUS] = "plus",
     [TK_MULT] = "multiply",
     [TK_DIV] = "division",
+
+    [TK_NUMBER] = "number",
+
+    [TK_EOF] = "end of file",
+    [TK_UNKNOWN] = "unknown",
 };
 
 typedef struct
 {
     token_kind_t kind; 
+    // @FIXME: literal is char for now, this needs to be const char *
+    char literal;
     uint column;
     uint line;
 } token_t;

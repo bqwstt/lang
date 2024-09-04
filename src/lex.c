@@ -19,6 +19,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#define is_digit(c) ((c) >= '0' && (c) <= '9')
+
 lexer_t lexer_create(stringview_t code)
 {
     lexer_t lexer;
@@ -32,36 +34,43 @@ lexer_t lexer_create(stringview_t code)
 
 void lexer_read_char(lexer_t * lexer)
 {
-    if (lexer->code.contents[lexer->next_pos] == '\0') {
-        //  @TODO: I don't think this gets hit.
-        lexer->current = 0;
-        return;
-    }
-
     lexer->current = lexer->code.contents[lexer->next_pos];
     lexer->cur_pos = lexer->next_pos++;
 }
 
 token_t lexer_consume_token(lexer_t * lexer)
 {
-    if (lexer->next_pos < lexer->code.len)
-        lexer_read_char(lexer);
-
     token_t token;
+    token.kind = TK_UNKNOWN;
+
+    if (lexer->next_pos < lexer->code.len
+        && lexer->code.contents[lexer->next_pos] != '\0') {
+        lexer_read_char(lexer);
+    } else {
+        token.kind = TK_EOF;
+        return token;
+    }
+
+    while (lexer->current == ' ') {
+        lexer->spaces++;
+
+        if (lexer->after_newline && lexer->spaces == 4) {
+            token.kind = TK_SEP;
+            lexer->after_newline = false;
+            lexer->spaces = 0;
+            lexer->next_pos++;
+            return token;
+        }
+
+        lexer_read_char(lexer);
+    }
+
     switch (lexer->current) {
         case '\n':
             lexer->after_newline = true;
             break;
         case ' ':
-            lexer->spaces++;
-
-            if (lexer->after_newline && lexer->spaces == 4) {
-                token.kind = TK_SEP;
-                lexer->after_newline = false;
-                lexer->spaces = 0;
-                lexer->next_pos++;
-            }
-            return token;
+            break;
         case '+':
             token.kind = TK_PLUS;
             break;
@@ -75,6 +84,15 @@ token_t lexer_consume_token(lexer_t * lexer)
             token.kind = TK_DIV;
             break;
         default:
+            if (is_digit(lexer->current)) {
+                token.kind = TK_NUMBER;
+                // @TODO: make copy of this char
+                /* token.literal = lexer->current; */
+                token.literal = (char)'t';
+                break;
+            }
+
+            token.kind = TK_ILLEGAL;
             break;
     }
 

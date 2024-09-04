@@ -37,10 +37,10 @@
 #include "ast.c"
 #include "parse.c"
 
-#define STRING_LENGTH 7
-const char * example_program = "- + * /";
+#define STRING_LENGTH 12
+const char * example_program = "1+2*3/2+6*2";
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
     stringview_t code;
     code.contents = example_program;
@@ -49,6 +49,6 @@ int main(int argc, char** argv)
     lexer_t lexer = lexer_create(code);
     parser_t parser = parser_create(&lexer);
     parser_parse(&parser);
-
+    parser_destroy(&parser);
     return 0;
 }

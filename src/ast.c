@@ -19,13 +19,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-ast_node_t * ast_create_node(arena_t * arena)
-{
-    ast_node_t * node = arena_alloc(arena, sizeof(ast_node_t));
-    node->valid = false;
-    node->token = NULL;
-    return node;
-}
+#define ast_create_node(arena) arena_alloc(arena, sizeof(ast_node_t))
+#define ast_create_node_sized(arena, sz) arena_alloc(arena, sz)
 
 ast_program_t ast_create_program()
 {
@@ -34,3 +29,38 @@ ast_program_t ast_create_program()
     return program;
 }
 
+const char * ast_node_id(ast_node_t * node)
+{
+    switch (node->kind) {
+        case ASTK_EXPR:
+        case ASTK_BINARY:
+            return "Expr";
+        case ASTK_STMT:
+            return "Statement";
+        default:
+            return "Unknown";
+    }
+}
+
+void ast_node_dump(ast_node_t * node)
+{
+    switch (node->kind) {
+        case ASTK_EXPR: {
+            ast_node_t * expr = node;
+            printf("%c", expr->token.literal);
+            break;
+        }
+        case ASTK_BINARY: {
+            ast_binary_op_t * binop = (ast_binary_op_t *)node;
+            const char * op = token_names[binop->token.kind];
+            printf("(");
+            ast_node_dump(binop->left);
+            printf(" %s ", op);
+            ast_node_dump(binop->right);
+            printf(")");
+            break;
+        }
+        default:
+            break;
+    }
+}
