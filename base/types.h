@@ -16,6 +16,7 @@ typedef uint32_t boolean;
 typedef unsigned char byte;
 
 typedef uintptr_t uintptr;
+typedef off_t offset;
 typedef size_t size;
 
 #define false (boolean)0
