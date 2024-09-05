@@ -130,6 +130,9 @@ ast_statement_t * parser_parse_statement(parser_t * parser)
 
 ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, arena_t * scratch)
 {
+    // Implementation of a Pratt parser.
+    // Wonderful article explaining this algorithm:
+    // https://martin.janiczek.cz/2023/07/03/demystifying-pratt-parsers.html
     ast_statement_t * expr = ast_create_node(scratch);
     assert(expr);
 
@@ -137,8 +140,13 @@ ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, a
     expr->token = parser->current_token;
 
     while (parser_kind_is_operator(parser->next_token.kind)) {
-        uint8 current_prec = parser_operator_precedence(parser->next_token.kind); 
-        if (current_prec <= prec_limit) {
+        uint8 prec = parser_operator_precedence(parser->next_token.kind);
+        uint8 final_prec = prec;
+        if (parser_operator_associativity(parser->next_token.kind) == ASSOC_RIGHT) {
+            final_prec -= 1;
+        }
+
+        if (prec <= prec_limit) {
             return expr;
         }
 
@@ -148,7 +156,7 @@ ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, a
         parser_consume_token(parser);
         parser_consume_token(parser);
 
-        ast_statement_t * right = parser_parse_expression(parser, current_prec, scratch);
+        ast_statement_t * right = parser_parse_expression(parser, final_prec, scratch);
         ast_binary_op_t * binop = ast_create_node_sized(scratch, sizeof(ast_binary_op_t));
         assert(binop);
 
