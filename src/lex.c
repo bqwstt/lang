@@ -73,6 +73,7 @@ token_t lexer_consume_token(lexer_t * lexer)
         return token;
     }
 
+    // @TODO: handle blank lines?
     while (lexer->current == ' ') {
         lexer->spaces++;
 
@@ -104,6 +105,9 @@ token_t lexer_consume_token(lexer_t * lexer)
             break;
         case '/':
             token.kind = TK_DIV;
+            break;
+        case '^':
+            token.kind = TK_EXP;
             break;
         default:
             if (is_digit(lexer->current)) {

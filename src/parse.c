@@ -47,7 +47,8 @@ boolean parser_kind_is_operator(token_kind_t kind)
     return kind == TK_PLUS
         || kind == TK_MINUS
         || kind == TK_MULT
-        || kind == TK_DIV;
+        || kind == TK_DIV
+        || kind == TK_EXP;
 }
 
 uint parser_operator_precedence(token_kind_t op)
@@ -60,6 +61,8 @@ uint parser_operator_precedence(token_kind_t op)
         case TK_MULT:
         case TK_DIV:
             return 2;
+        case TK_EXP:
+            return 3;
         default:
             return 0;
     }
@@ -73,7 +76,8 @@ op_assoc_t parser_operator_associativity(token_kind_t op)
         case TK_MULT:
         case TK_DIV:
             return ASSOC_LEFT;
-        /* case ^ ... ASSOC_RIGHT */
+        case TK_EXP:
+            return ASSOC_RIGHT;
         default:
             return ASSOC_UNKNOWN;
     }

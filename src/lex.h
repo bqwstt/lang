@@ -31,6 +31,7 @@ typedef enum
     TK_PLUS,
     TK_MULT,
     TK_DIV,
+    TK_EXP,
 
     TK_NUMBER,
 
@@ -46,6 +47,7 @@ static const char * token_names[] = {
     [TK_PLUS] = "plus",
     [TK_MULT] = "multiply",
     [TK_DIV] = "division",
+    [TK_EXP] = "exponent",
 
     [TK_NUMBER] = "number",
 

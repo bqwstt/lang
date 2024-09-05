@@ -40,7 +40,7 @@
 
 int main(int argc, char ** argv)
 {
-    string_t code = string("1.1+2.5251*3.123");
+    string_t code = string("1+2-3*4/5^6");
 
     lexer_t lexer = lexer_create(code);
     parser_t parser = parser_create(&lexer);
