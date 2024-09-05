@@ -19,6 +19,9 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#ifndef LIBC_H
+#define LIBC_H
+
 // These are memset() and memmove() implementations from gcc's libc.
 // This file exists just because I don't want to include string.h.
 void * memset(void * dest, int val, size len)
@@ -45,3 +48,5 @@ void * memmove(void * dest, const void * src, size len)
 
     return dest;
 }
+
+#endif // LIBC_H

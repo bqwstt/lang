@@ -19,4 +19,9 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#ifndef IO_H
+#define IO_H
+
 string_t io_read_contents(const char * filename);
+
+#endif // IO_H
