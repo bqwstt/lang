@@ -47,7 +47,10 @@ void ast_node_dump(ast_node_t * node)
     switch (node->kind) {
         case ASTK_EXPR: {
             ast_node_t * expr = node;
-            printf("%c", expr->token.literal);
+            string_t literal = expr->token.literal;
+            // @TODO: check if we have to do this instead?
+            /* printf("%.*s", (int32)literal.len, literal.data); */
+            printf("%s", literal.data);
             break;
         }
         case ASTK_BINARY: {

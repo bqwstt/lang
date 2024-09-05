@@ -21,10 +21,17 @@
 
 #define is_digit(c) ((c) >= '0' && (c) <= '9')
 
-lexer_t lexer_create(stringview_t code)
+#define LEXER_LITERAL_LIMIT 131072
+static byte * literal_buffer[LEXER_LITERAL_LIMIT];
+
+lexer_t lexer_create(string_t code)
 {
+    arena_t literal_arena;
+    arena_init(&literal_arena, literal_buffer, LEXER_LITERAL_LIMIT);
+
     lexer_t lexer;
     lexer.code = code;
+    lexer.literal_arena = literal_arena;
     lexer.cur_pos = 0;
     lexer.next_pos = 0;
     lexer.spaces = 0;
@@ -32,9 +39,14 @@ lexer_t lexer_create(stringview_t code)
     return lexer;
 }
 
+void lexer_destroy(lexer_t * lexer)
+{
+    arena_free(&lexer->literal_arena);
+}
+
 void lexer_read_char(lexer_t * lexer)
 {
-    lexer->current = lexer->code.contents[lexer->next_pos];
+    lexer->current = lexer->code.data[lexer->next_pos];
     lexer->cur_pos = lexer->next_pos++;
 }
 
@@ -44,7 +56,7 @@ token_t lexer_consume_token(lexer_t * lexer)
     token.kind = TK_UNKNOWN;
 
     if (lexer->next_pos < lexer->code.len
-        && lexer->code.contents[lexer->next_pos] != '\0') {
+        && lexer->code.data[lexer->next_pos] != '\0') {
         lexer_read_char(lexer);
     } else {
         token.kind = TK_EOF;
@@ -85,10 +97,9 @@ token_t lexer_consume_token(lexer_t * lexer)
             break;
         default:
             if (is_digit(lexer->current)) {
+                // @TODO: handle more than 1 digit!
                 token.kind = TK_NUMBER;
-                // @TODO: make copy of this char
-                /* token.literal = lexer->current; */
-                token.literal = (char)'t';
+                token.literal = string_from_char(lexer->current, &lexer->literal_arena);
                 break;
             }
 

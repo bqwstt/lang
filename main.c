@@ -25,26 +25,22 @@
 
 #include "base/types.h"
 #include "base/libc.h"
-#include "base/stringview.h"
 #include "base/arena.h"
+#include "base/string.h"
 
 #include "lex.h"
 #include "ast.h"
 #include "parse.h"
 
 #include "base/arena.c"
+#include "base/string.c"
 #include "lex.c"
 #include "ast.c"
 #include "parse.c"
 
-#define STRING_LENGTH 12
-const char * example_program = "1+2*3/2+6*2";
-
 int main(int argc, char ** argv)
 {
-    stringview_t code;
-    code.contents = example_program;
-    code.len = STRING_LENGTH;
+    string_t code = string("1+2*3/4+5-6*7/8-9");
 
     lexer_t lexer = lexer_create(code);
     parser_t parser = parser_create(&lexer);

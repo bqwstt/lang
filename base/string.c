@@ -19,65 +19,23 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef LEX_H
-#define LEX_H
-
-typedef enum
+string_t string_clone(string_t string, arena_t * arena)
 {
-    TK_UNKNOWN,
+    uint8 * new_data = arena_alloc(arena, string.len);
+    assert(new_data);
 
-    TK_SEP,
-    TK_MINUS,
-    TK_PLUS,
-    TK_MULT,
-    TK_DIV,
+    for (size i = 0; i < string.len; ++i) {
+        new_data[i] = string.data[i];
+    }
 
-    TK_NUMBER,
+    return string_sized(new_data, string.len);
+}
 
-    TK_ILLEGAL,
-    TK_EOF,
-} token_kind_t;
-
-static const char * token_names[] = {
-    [TK_ILLEGAL] = "illegal",
-
-    [TK_SEP] = "separation",
-    [TK_MINUS] = "minus",
-    [TK_PLUS] = "plus",
-    [TK_MULT] = "multiply",
-    [TK_DIV] = "division",
-
-    [TK_NUMBER] = "number",
-
-    [TK_EOF] = "end of file",
-    [TK_UNKNOWN] = "unknown",
-};
-
-typedef struct
+string_t string_from_char(char c, arena_t * arena)
 {
-    token_kind_t kind; 
-    string_t literal;
-    uint column;
-    uint line;
-} token_t;
+    uint8 * data = arena_alloc(arena, 1);
+    assert(data);
 
-typedef struct
-{
-    uint64 cur_pos;
-    uint64 next_pos;
-
-    arena_t literal_arena;
-
-    uint8 spaces;
-    char current;
-    boolean after_newline;
-
-    string_t code;
-} lexer_t;
-
-lexer_t lexer_create(string_t code);
-void lexer_destroy(lexer_t * lexer);
-void lexer_read_char(lexer_t * lexer);
-token_t lexer_consume_token(lexer_t * lexer);
-
-#endif // LEX_H
+    data[0] = (uint8)c;
+    return string_sized(data, 1);
+}

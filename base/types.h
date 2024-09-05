@@ -21,4 +21,15 @@ typedef size_t size;
 #define false (boolean)0
 #define true  (boolean)1
 
+// Some macros mentioned in: https://nullprogram.com/blog/2023/10/08/
+// These are really handy. :)
+#if defined(__GNUC__) || defined(__clang__)
+    #define assert(c) while (!(c)) __builtin_unreachable()
+#else
+    #define assert(c)
+#endif
+
+#define countof(a)  (size)(sizeof(a) / sizeof(*(a)))
+#define lengthof(s) (countof(s) - 1)
+
 #endif // TYPES_H

@@ -19,6 +19,10 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// @TODO: may want to use dynamic alloc
+#define PARSER_NODE_LIMIT 131072
+static byte * node_buffer[PARSER_NODE_LIMIT];
+
 parser_t parser_create(lexer_t * lexer)
 {
     arena_t node_arena;
@@ -34,6 +38,7 @@ parser_t parser_create(lexer_t * lexer)
 
 void parser_destroy(parser_t * parser)
 {
+    lexer_destroy(parser->lexer);
     arena_free(&parser->node_arena);
 }
 
@@ -105,6 +110,8 @@ void parser_parse(parser_t * parser)
 ast_statement_t * parser_parse_statement(parser_t * parser)
 {
     ast_statement_t * stmt = ast_create_node(&parser->node_arena);
+    assert(stmt);
+
     stmt->kind = ASTK_STMT;
 
     if (parser->current_token.kind == TK_NUMBER) {
@@ -120,6 +127,8 @@ ast_statement_t * parser_parse_statement(parser_t * parser)
 ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, arena_t * scratch)
 {
     ast_statement_t * expr = ast_create_node(scratch);
+    assert(expr);
+
     expr->kind  = ASTK_EXPR;
     expr->token = parser->current_token;
 
@@ -137,6 +146,8 @@ ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, a
 
         ast_statement_t * right = parser_parse_expression(parser, current_prec, scratch);
         ast_binary_op_t * binop = ast_create_node_sized(scratch, sizeof(ast_binary_op_t));
+        assert(binop);
+
         binop->kind  = ASTK_BINARY;
         binop->left  = expr;
         binop->right = right;

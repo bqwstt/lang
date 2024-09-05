@@ -22,10 +22,6 @@
 #ifndef PARSE_H
 #define PARSE_H
 
-// @TODO: may want to use dynamic alloc
-#define PARSER_NODE_LIMIT 131072
-static byte * node_buffer[PARSER_NODE_LIMIT];
-
 typedef struct
 {
     lexer_t * lexer;
