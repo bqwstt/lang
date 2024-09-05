@@ -44,8 +44,15 @@ void lexer_destroy(lexer_t * lexer)
     arena_free(&lexer->literal_arena);
 }
 
+char lexer_peek(lexer_t * lexer)
+{
+    assert(lexer->code.data);
+    return lexer->code.data[lexer->next_pos];
+}
+
 void lexer_read_char(lexer_t * lexer)
 {
+    assert(lexer->code.data);
     lexer->current = lexer->code.data[lexer->next_pos];
     lexer->cur_pos = lexer->next_pos++;
 }
@@ -54,6 +61,9 @@ token_t lexer_consume_token(lexer_t * lexer)
 {
     token_t token;
     token.kind = TK_UNKNOWN;
+    token.literal = string("");
+
+    assert(lexer->code.data);
 
     if (lexer->next_pos < lexer->code.len
         && lexer->code.data[lexer->next_pos] != '\0') {
@@ -97,9 +107,7 @@ token_t lexer_consume_token(lexer_t * lexer)
             break;
         default:
             if (is_digit(lexer->current)) {
-                // @TODO: handle more than 1 digit!
-                token.kind = TK_NUMBER;
-                token.literal = string_from_char(lexer->current, &lexer->literal_arena);
+                token = lexer_consume_number(lexer);
                 break;
             }
 
@@ -107,5 +115,22 @@ token_t lexer_consume_token(lexer_t * lexer)
             break;
     }
 
+    return token;
+}
+
+token_t lexer_consume_number(lexer_t * lexer)
+{
+    string_t number = string_from_char(lexer->current, &lexer->literal_arena);
+
+    char next_digit = lexer_peek(lexer);
+    while (is_digit(next_digit) || next_digit == '.') {
+        number = string_extend(number, next_digit, &lexer->literal_arena);
+        lexer_read_char(lexer);
+        next_digit = lexer_peek(lexer);
+    }
+
+    token_t token;
+    token.kind = TK_NUMBER;
+    token.literal = number;
     return token;
 }

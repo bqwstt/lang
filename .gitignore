@@ -1,3 +1,4 @@
 # let's ignore the silly examples for now :)
 examples/**/*
 lang
+tags

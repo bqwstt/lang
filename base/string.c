@@ -19,6 +19,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+string_t string_extend(string_t string, uint8 c, arena_t * arena)
+{
+    uint8 * new_data = arena_alloc(arena, string.len+1);
+    assert(new_data);
+
+    for (size i = 0; i < string.len; ++i) {
+        new_data[i] = string.data[i];
+    }
+
+    new_data[string.len] = c;
+    return string_sized(new_data, string.len+1);
+}
+
 string_t string_clone(string_t string, arena_t * arena)
 {
     uint8 * new_data = arena_alloc(arena, string.len);

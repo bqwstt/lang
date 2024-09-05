@@ -34,6 +34,7 @@ typedef struct
 #define string_sized(s, l) (string_t){(uint8 *)s, l}
 #define string(s) (string_t){(uint8 *)s, lengthof(s)}
 
+string_t string_extend(string_t string, uint8 c, arena_t * arena);
 string_t string_clone(string_t string, arena_t * arena);
 string_t string_from_char(char c, arena_t * arena);
 

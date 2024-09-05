@@ -77,7 +77,10 @@ typedef struct
 
 lexer_t lexer_create(string_t code);
 void lexer_destroy(lexer_t * lexer);
+char lexer_peek(lexer_t * lexer);
 void lexer_read_char(lexer_t * lexer);
+
 token_t lexer_consume_token(lexer_t * lexer);
+token_t lexer_consume_number(lexer_t * lexer);
 
 #endif // LEX_H
