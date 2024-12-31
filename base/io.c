@@ -19,17 +19,17 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-string_t io_read_contents(const char * filename)
+String IO_ReadFileContentsFromFilepath(const char* filename)
 {
     // @TODO: proper error checking
     int fd = open(filename, O_RDONLY);
     assert(fd != -1);
 
     offset len = lseek(fd, 0, SEEK_END);
-    uint8 * data = (uint8 *)mmap(0, len, PROT_READ, MAP_PRIVATE, fd, 0);
+    uint8* data = (uint8 *)mmap(0, len, PROT_READ, MAP_PRIVATE, fd, 0);
     assert(data != MAP_FAILED);
 
-    string_t contents = string("");
+    String contents = STRING("");
     contents.data = data;
     contents.len = len-1;
     return contents;

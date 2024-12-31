@@ -43,18 +43,17 @@
 #include "ast.c"
 #include "parse.c"
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
     if (argc != 2) {
         printf("usage: ./lang <filename>\n");
         return 1;
     }
 
-    string_t code = io_read_contents(argv[1]);
-
-    lexer_t lexer = lexer_create(code);
-    parser_t parser = parser_create(&lexer);
-    parser_parse(&parser);
-    parser_destroy(&parser);
+    String code = IO_ReadFileContentsFromFilepath(argv[1]);
+    Lexer lexer = Lexer_Create(code);
+    Parser parser = Parser_Create(&lexer);
+    Parser_Parse(&parser);
+    Parser_Destroy(&parser);
     return 0;
 }

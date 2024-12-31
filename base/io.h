@@ -22,6 +22,6 @@
 #ifndef IO_H
 #define IO_H
 
-string_t io_read_contents(const char * filename);
+String IO_ReadFileContentsFromFilepath(const char* filename);
 
 #endif // IO_H

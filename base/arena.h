@@ -25,24 +25,26 @@
 /// Arena implementation from:
 /// * https://www.gingerbill.org/article/2019/02/08/memory-allocation-strategies-002/
 
-#define DEFAULT_ARENA_ALIGNMENT (2*sizeof(void *))
+#define DEFAULT_ARENA_ALIGNMENT (2*sizeof(void*))
 
-typedef struct
+struct Arena
 {
-    byte * buf;
+    byte* buf;
     size buf_len;
     size prev_offset;
     size curr_offset;
-} arena_t;
+};
+typedef struct Arena Arena;
 
-boolean uintptr_power_of_two(uintptr x);
+bool PtrIsPowerOfTwo(uintptr x);
 
-void arena_init(arena_t * arena, void * buffer, size buffer_length);
-void arena_free(arena_t * arena);
-uintptr arena_align_forward(uintptr ptr, size align);
-void * arena_alloc_align(arena_t * arena, size sz, size align);
-void * arena_alloc(arena_t * arena, size sz);
-void * arena_resize_align(arena_t * arena, void * old_memory, size old_sz, size new_sz, size align);
-void * arena_resize(arena_t * arena, void * old_memory, size old_sz, size new_sz);
+void Arena_Initialize(Arena* arena, void* buffer, size buffer_length);
+void Arena_Free(Arena* arena);
+
+uintptr Arena_AlignForward(uintptr ptr, size align);
+void* Arena_AllocAligned(Arena* arena, size sz, size align);
+void* Arena_Alloc(Arena* arena, size sz);
+void* Arena_ResizeAligned(Arena* arena, void* old_memory, size old_sz, size new_sz, size align);
+void* Arena_Resize(Arena* arena, void* old_memory, size old_sz, size new_sz);
 
 #endif // ARENA_H

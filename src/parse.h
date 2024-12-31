@@ -22,36 +22,38 @@
 #ifndef PARSE_H
 #define PARSE_H
 
-typedef struct
+struct Parser
 {
-    lexer_t * lexer;
-    arena_t node_arena;
+    Lexer* lexer;
+    Arena node_arena;
 
-    token_t current_token;
-    token_t next_token;
-} parser_t;
+    Token current_token;
+    Token next_token;
+};
+typedef struct Parser Parser;
 
-typedef enum
+enum OperatorAssociativityType
 {
     ASSOC_UNKNOWN,
     ASSOC_RIGHT,
     ASSOC_LEFT,
-} op_assoc_t;
+};
+typedef enum OperatorAssociativityType OperatorAssociativityType;
 
-parser_t parser_create(lexer_t * lexer);
-void parser_destroy(parser_t * parser);
-void parser_consume_token(parser_t * parser);
-void parser_parse(parser_t * parser);
+Parser Parser_CreateParser(Lexer* lexer);
+void   Parser_DestroyParser(Parser* parser);
+void   Parser_ConsumeToken(Parser* parser);
+void   Parser_Parse(Parser* parser);
 
 /* Helpers */
-boolean parser_kind_is_operator(token_kind_t kind);
-uint parser_operator_precedence(token_kind_t op);
-op_assoc_t parser_operator_associativity(token_kind_t op);
+bool Parser_TokenKindIsOperator(TokenKind kind);
+uint Parser_OperatorPrecedence(TokenKind op);
+OperatorAssociativityType Parser_OperatorAssociativity(TokenKind op);
 
 /* Parsing functions */
-ast_statement_t * parser_parse_statement(parser_t * parser);
-ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, arena_t * scratch);
+ASTStatement* Parser_ParseStatement(Parser* parser);
+ASTStatement* Parser_ParseExpression(Parser* parser, uint8 prec_limit, Arena* scratch);
 
-void parser_dump_ast(parser_t * parser, ast_program_t * root);
+void Parser_DumpAST(Parser* parser, ASTProgram* root);
 
 #endif // PARSE_H

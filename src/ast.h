@@ -22,42 +22,46 @@
 #ifndef AST_H
 #define AST_H
 
-typedef enum
+enum ASTKind
 {
     ASTK_UNKNOWN,
 
     ASTK_BINARY,
     ASTK_STMT,
     ASTK_EXPR,
-} ast_kind_t;
+};
+typedef enum ASTKind ASTKind;
 
 // @TODO: we may want token to be a ptr
-#define ast_base \
-    token_t token; \
-    ast_kind_t kind;
+#define ASTBase \
+    Token token; \
+    ASTKind kind;
 
-typedef struct {
-    ast_base;
-} ast_node_t;
-typedef ast_node_t ast_statement_t;
+struct ASTNode {
+    ASTBase;
+};
+typedef struct ASTNode ASTNode;
+typedef struct ASTNode ASTStatement;
 
 #define MAX_STATEMENTS 1024
-typedef struct
+struct ASTProgram
 {
     // @TODO: use arena
     uint16 statements_len;
-    ast_node_t * statements[MAX_STATEMENTS];
-} ast_program_t;
+    ASTNode* statements[MAX_STATEMENTS];
+};
+typedef struct ASTProgram ASTProgram;
 
-typedef struct
+struct ASTBinaryOp
 {
-    ast_base;
-    ast_node_t * left;
-    ast_node_t * right;
-} ast_binary_op_t;
+    ASTBase;
+    ASTNode* left;
+    ASTNode* right;
+};
+typedef struct ASTBinaryOp ASTBinaryOp;
 
 /* Helpers */
-const char * ast_node_id(ast_node_t * node);
-void ast_node_dump(ast_node_t * node);
+const char* AST_GetNodeID(ASTNode* node);
+void AST_DumpNode(ASTNode* node);
 
 #endif // AST_H

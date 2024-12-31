@@ -22,7 +22,7 @@
 #ifndef LEX_H
 #define LEX_H
 
-typedef enum
+enum TokenKind
 {
     TK_UNKNOWN,
 
@@ -37,9 +37,10 @@ typedef enum
 
     TK_ILLEGAL,
     TK_EOF,
-} token_kind_t;
+};
+typedef enum TokenKind TokenKind;
 
-static const char * token_names[] = {
+static const char* token_names[] = {
     [TK_ILLEGAL] = "illegal",
 
     [TK_SEP] = "separation",
@@ -55,34 +56,36 @@ static const char * token_names[] = {
     [TK_UNKNOWN] = "unknown",
 };
 
-typedef struct
+struct Token
 {
-    token_kind_t kind; 
-    string_t literal;
+    TokenKind kind; 
+    String literal;
     uint column;
     uint line;
-} token_t;
+};
+typedef struct Token Token;
 
-typedef struct
+struct Lexer
 {
     uint64 cur_pos;
     uint64 next_pos;
 
-    arena_t literal_arena;
+    Arena literal_arena;
 
     uint8 spaces;
     char current;
-    boolean after_newline;
+    bool after_newline;
 
-    string_t code;
-} lexer_t;
+    String code;
+};
+typedef struct Lexer Lexer;
 
-lexer_t lexer_create(string_t code);
-void lexer_destroy(lexer_t * lexer);
-char lexer_peek(lexer_t * lexer);
-void lexer_read_char(lexer_t * lexer);
+Lexer Lexer_Create(String code);
+void  Lexer_Destroy(Lexer* lexer);
+char  Lexer_Peek(Lexer* lexer);
+void  Lexer_ReadChar(Lexer* lexer);
 
-token_t lexer_consume_token(lexer_t * lexer);
-token_t lexer_consume_number(lexer_t * lexer);
+Token Lexer_ConsumeToken(Lexer* lexer);
+Token Lexer_ConsumeNumber(Lexer* lexer);
 
 #endif // LEX_H

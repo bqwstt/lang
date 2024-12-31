@@ -19,17 +19,17 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#define is_digit(c) ((c) >= '0' && (c) <= '9')
+#define IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 
 #define LEXER_LITERAL_LIMIT 131072
-static byte * literal_buffer[LEXER_LITERAL_LIMIT];
+static byte* literal_buffer[LEXER_LITERAL_LIMIT];
 
-lexer_t lexer_create(string_t code)
+Lexer Lexer_Create(String code)
 {
-    arena_t literal_arena;
-    arena_init(&literal_arena, literal_buffer, LEXER_LITERAL_LIMIT);
+    Arena literal_arena;
+    Arena_Initialize(&literal_arena, literal_buffer, LEXER_LITERAL_LIMIT);
 
-    lexer_t lexer;
+    Lexer lexer;
     lexer.code = code;
     lexer.literal_arena = literal_arena;
     lexer.cur_pos = 0;
@@ -39,35 +39,35 @@ lexer_t lexer_create(string_t code)
     return lexer;
 }
 
-void lexer_destroy(lexer_t * lexer)
+void Lexer_Destroy(Lexer* lexer)
 {
-    arena_free(&lexer->literal_arena);
+    Arena_Free(&lexer->literal_arena);
 }
 
-char lexer_peek(lexer_t * lexer)
+char Lexer_Peek(Lexer* lexer)
 {
     assert(lexer->code.data);
     return lexer->code.data[lexer->next_pos];
 }
 
-void lexer_read_char(lexer_t * lexer)
+void Lexer_ReadChar(Lexer* lexer)
 {
     assert(lexer->code.data);
     lexer->current = lexer->code.data[lexer->next_pos];
     lexer->cur_pos = lexer->next_pos++;
 }
 
-token_t lexer_consume_token(lexer_t * lexer)
+Token Lexer_ConsumeToken(Lexer* lexer)
 {
-    token_t token;
+    Token token;
     token.kind = TK_UNKNOWN;
-    token.literal = string("");
+    token.literal = STRING("");
 
     assert(lexer->code.data);
 
     if (lexer->next_pos < lexer->code.len
         && lexer->code.data[lexer->next_pos] != '\0') {
-        lexer_read_char(lexer);
+        Lexer_ReadChar(lexer);
     } else {
         token.kind = TK_EOF;
         return token;
@@ -85,7 +85,7 @@ token_t lexer_consume_token(lexer_t * lexer)
             return token;
         }
 
-        lexer_read_char(lexer);
+        Lexer_ReadChar(lexer);
     }
 
     switch (lexer->current) {
@@ -110,8 +110,8 @@ token_t lexer_consume_token(lexer_t * lexer)
             token.kind = TK_EXP;
             break;
         default:
-            if (is_digit(lexer->current)) {
-                token = lexer_consume_number(lexer);
+            if (IS_DIGIT(lexer->current)) {
+                token = Lexer_ConsumeNumber(lexer);
                 break;
             }
 
@@ -122,18 +122,18 @@ token_t lexer_consume_token(lexer_t * lexer)
     return token;
 }
 
-token_t lexer_consume_number(lexer_t * lexer)
+Token Lexer_ConsumeNumber(Lexer* lexer)
 {
-    string_t number = string_from_char(lexer->current, &lexer->literal_arena);
+    String number = String_FromChar(lexer->current, &lexer->literal_arena);
 
-    char next_digit = lexer_peek(lexer);
-    while (is_digit(next_digit) || next_digit == '.') {
-        number = string_extend(number, next_digit, &lexer->literal_arena);
-        lexer_read_char(lexer);
-        next_digit = lexer_peek(lexer);
+    char next_digit = Lexer_Peek(lexer);
+    while (IS_DIGIT(next_digit) || next_digit == '.') {
+        number = String_Extend(number, next_digit, &lexer->literal_arena);
+        Lexer_ReadChar(lexer);
+        next_digit = Lexer_Peek(lexer);
     }
 
-    token_t token;
+    Token token;
     token.kind = TK_NUMBER;
     token.literal = number;
     return token;

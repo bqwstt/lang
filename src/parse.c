@@ -21,28 +21,28 @@
 
 // @TODO: may want to use dynamic alloc
 #define PARSER_NODE_LIMIT 131072
-static byte * node_buffer[PARSER_NODE_LIMIT];
+static byte* node_buffer[PARSER_NODE_LIMIT];
 
-parser_t parser_create(lexer_t * lexer)
+Parser Parser_Create(Lexer* lexer)
 {
-    arena_t node_arena;
-    arena_init(&node_arena, node_buffer, PARSER_NODE_LIMIT);
+    Arena node_arena;
+    Arena_Initialize(&node_arena, node_buffer, PARSER_NODE_LIMIT);
 
-    parser_t parser;
+    Parser parser;
     parser.lexer = lexer;
     parser.node_arena = node_arena;
-    parser_consume_token(&parser);
-    parser_consume_token(&parser);
+    Parser_ConsumeToken(&parser);
+    Parser_ConsumeToken(&parser);
     return parser;
 }
 
-void parser_destroy(parser_t * parser)
+void Parser_Destroy(Parser* parser)
 {
-    lexer_destroy(parser->lexer);
-    arena_free(&parser->node_arena);
+    Lexer_Destroy(parser->lexer);
+    Arena_Free(&parser->node_arena);
 }
 
-boolean parser_kind_is_operator(token_kind_t kind)
+bool Parser_TokenKindIsOperator(TokenKind kind)
 {
     return kind == TK_PLUS
         || kind == TK_MINUS
@@ -51,7 +51,7 @@ boolean parser_kind_is_operator(token_kind_t kind)
         || kind == TK_EXP;
 }
 
-uint parser_operator_precedence(token_kind_t op)
+uint Parser_OperatorPrecedence(TokenKind op)
 {
     // @TODO: add more ops as we go (^)
     switch (op) {
@@ -68,7 +68,7 @@ uint parser_operator_precedence(token_kind_t op)
     }
 }
 
-op_assoc_t parser_operator_associativity(token_kind_t op)
+OperatorAssociativityType Parser_OperatorAssociativity(TokenKind op)
 {
     switch (op) {
         case TK_MINUS:
@@ -83,66 +83,66 @@ op_assoc_t parser_operator_associativity(token_kind_t op)
     }
 }
 
-void parser_consume_token(parser_t * parser)
+void Parser_ConsumeToken(Parser* parser)
 {
     parser->current_token = parser->next_token;
     if (parser->current_token.kind == TK_ILLEGAL || parser->current_token.kind == TK_EOF)
         return;
 
-    parser->next_token = lexer_consume_token(parser->lexer);
+    parser->next_token = Lexer_ConsumeToken(parser->lexer);
 }
 
-void parser_parse(parser_t * parser)
+void Parser_Parse(Parser* parser)
 {
-    ast_program_t program = ast_create_program();
+    ASTProgram program = AST_CreateProgramNode();
 
     while (parser->current_token.kind != TK_EOF) {
-        ast_statement_t * stmt = parser_parse_statement(parser);
+        ASTStatement* stmt = Parser_ParseStatement(parser);
 
         if (stmt != NULL) {
             program.statements[program.statements_len++] = stmt;
         }
 
         // @TODO: we may want to reduce all tokens, not just 1?
-        parser_consume_token(parser);
+        Parser_ConsumeToken(parser);
     }
     
-    parser_dump_ast(parser, &program);
+    Parser_DumpAST(parser, &program);
     return;
 }
 
-ast_statement_t * parser_parse_statement(parser_t * parser)
+ASTStatement* Parser_ParseStatement(Parser* parser)
 {
-    ast_statement_t * stmt = ast_create_node(&parser->node_arena);
+    ASTStatement* stmt = AST_CREATE_NODE(&parser->node_arena);
     assert(stmt);
 
     stmt->kind = ASTK_STMT;
 
     if (parser->current_token.kind == TK_NUMBER) {
-        byte * scratch_node_buffer[16384];
-        arena_t scratch;
-        arena_init(&scratch, scratch_node_buffer, 16384);
-        stmt = parser_parse_expression(parser, 0, &scratch);
+        byte* scratch_node_buffer[16384];
+        Arena scratch;
+        Arena_Initialize(&scratch, scratch_node_buffer, 16384);
+        stmt = Parser_ParseExpression(parser, 0, &scratch);
     }
 
     return stmt;
 }
 
-ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, arena_t * scratch)
+ASTStatement* Parser_ParseExpression(Parser* parser, uint8 prec_limit, Arena* scratch)
 {
     // Implementation of a Pratt parser.
     // Wonderful article explaining this algorithm:
     // https://martin.janiczek.cz/2023/07/03/demystifying-pratt-parsers.html
-    ast_statement_t * expr = ast_create_node(scratch);
+    ASTStatement* expr = AST_CREATE_NODE(scratch);
     assert(expr);
 
     expr->kind  = ASTK_EXPR;
     expr->token = parser->current_token;
 
-    while (parser_kind_is_operator(parser->next_token.kind)) {
-        uint8 prec = parser_operator_precedence(parser->next_token.kind);
+    while (Parser_TokenKindIsOperator(parser->next_token.kind)) {
+        uint8 prec = Parser_OperatorPrecedence(parser->next_token.kind);
         uint8 final_prec = prec;
-        if (parser_operator_associativity(parser->next_token.kind) == ASSOC_RIGHT) {
+        if (Parser_OperatorAssociativity(parser->next_token.kind) == ASSOC_RIGHT) {
             final_prec -= 1;
         }
 
@@ -150,14 +150,14 @@ ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, a
             return expr;
         }
 
-        token_t op_token = parser->next_token;
+        Token op_token = parser->next_token;
 
         // Consume both the number and the operator.
-        parser_consume_token(parser);
-        parser_consume_token(parser);
+        Parser_ConsumeToken(parser);
+        Parser_ConsumeToken(parser);
 
-        ast_statement_t * right = parser_parse_expression(parser, final_prec, scratch);
-        ast_binary_op_t * binop = ast_create_node_sized(scratch, sizeof(ast_binary_op_t));
+        ASTStatement* right = Parser_ParseExpression(parser, final_prec, scratch);
+        ASTBinaryOp*  binop = AST_CREATE_NODE_SIZED(scratch, sizeof(ASTBinaryOp));
         assert(binop);
 
         binop->kind  = ASTK_BINARY;
@@ -165,20 +165,20 @@ ast_statement_t * parser_parse_expression(parser_t * parser, uint8 prec_limit, a
         binop->right = right;
         binop->token = op_token;
 
-        expr = (ast_statement_t *)binop;
+        expr = (ASTStatement*)binop;
     };
 
     return expr;
 }
 
-void parser_dump_ast(parser_t * parser, ast_program_t * root)
+void Parser_DumpAST(Parser* parser, ASTProgram* root)
 {
     printf("│[Program]\n");
     for (uint i = 0; i < root->statements_len; ++i) {
-        ast_node_t * node = root->statements[i];
+        ASTNode* node = root->statements[i];
         printf("└──│[Statement]\n");
-        printf("   └───[%s] ", ast_node_id(node));
-        ast_node_dump(node);
+        printf("   └───[%s] ", AST_GetNodeID(node));
+        AST_DumpNode(node);
         printf("\n");
     }
 }

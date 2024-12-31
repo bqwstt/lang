@@ -11,7 +11,7 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 
 typedef uint32_t uint;
-typedef uint32_t boolean;
+typedef uint32_t bool;
 
 typedef unsigned char byte;
 
@@ -19,8 +19,8 @@ typedef uintptr_t uintptr;
 typedef off_t offset;
 typedef size_t size;
 
-#define false (boolean)0
-#define true  (boolean)1
+#define false (bool)0
+#define true  (bool)1
 
 // Some macros mentioned in: https://nullprogram.com/blog/2023/10/08/
 // These are really handy. :)

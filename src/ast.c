@@ -19,17 +19,17 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#define ast_create_node(arena) arena_alloc(arena, sizeof(ast_node_t))
-#define ast_create_node_sized(arena, sz) arena_alloc(arena, sz)
+#define AST_CREATE_NODE(arena)           Arena_Alloc(arena, sizeof(ASTNode))
+#define AST_CREATE_NODE_SIZED(arena, sz) Arena_Alloc(arena, sz)
 
-ast_program_t ast_create_program()
+ASTProgram AST_CreateProgramNode()
 {
-    ast_program_t program;
+    ASTProgram program;
     program.statements_len = 0;
     return program;
 }
 
-const char * ast_node_id(ast_node_t * node)
+const char* AST_GetNodeID(ASTNode* node)
 {
     switch (node->kind) {
         case ASTK_EXPR:
@@ -42,24 +42,24 @@ const char * ast_node_id(ast_node_t * node)
     }
 }
 
-void ast_node_dump(ast_node_t * node)
+void AST_DumpNode(ASTNode* node)
 {
     switch (node->kind) {
         case ASTK_EXPR: {
-            ast_node_t * expr = node;
-            string_t literal = expr->token.literal;
+            ASTNode* expr = node;
+            String literal = expr->token.literal;
             // @TODO: check if we have to do this instead?
             /* printf("%.*s", (int32)literal.len, literal.data); */
             printf("%s", literal.data);
             break;
         }
         case ASTK_BINARY: {
-            ast_binary_op_t * binop = (ast_binary_op_t *)node;
-            const char * op = token_names[binop->token.kind];
+            ASTBinaryOp* binop = (ASTBinaryOp*)node;
+            const char* op = token_names[binop->token.kind];
             printf("(");
-            ast_node_dump(binop->left);
+            AST_DumpNode(binop->left);
             printf(" %s ", op);
-            ast_node_dump(binop->right);
+            AST_DumpNode(binop->right);
             printf(")");
             break;
         }

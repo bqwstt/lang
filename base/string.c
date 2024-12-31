@@ -19,9 +19,9 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-string_t string_extend(string_t string, uint8 c, arena_t * arena)
+String String_Extend(String string, uint8 c, Arena* arena)
 {
-    uint8 * new_data = arena_alloc(arena, string.len+1);
+    uint8* new_data = Arena_Alloc(arena, string.len+1);
     assert(new_data);
 
     for (size i = 0; i < string.len; ++i) {
@@ -29,26 +29,26 @@ string_t string_extend(string_t string, uint8 c, arena_t * arena)
     }
 
     new_data[string.len] = c;
-    return string_sized(new_data, string.len+1);
+    return STRING_SIZED(new_data, string.len+1);
 }
 
-string_t string_clone(string_t string, arena_t * arena)
+String String_Clone(String string, Arena* arena)
 {
-    uint8 * new_data = arena_alloc(arena, string.len);
+    uint8* new_data = Arena_Alloc(arena, string.len);
     assert(new_data);
 
     for (size i = 0; i < string.len; ++i) {
         new_data[i] = string.data[i];
     }
 
-    return string_sized(new_data, string.len);
+    return STRING_SIZED(new_data, string.len);
 }
 
-string_t string_from_char(char c, arena_t * arena)
+String String_FromChar(char c, Arena* arena)
 {
-    uint8 * data = arena_alloc(arena, 1);
+    uint8* data = Arena_Alloc(arena, 1);
     assert(data);
 
     data[0] = (uint8)c;
-    return string_sized(data, 1);
+    return STRING_SIZED(data, 1);
 }

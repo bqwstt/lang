@@ -25,17 +25,18 @@
 // String as mentioned in: https://nullprogram.com/blog/2023/10/08/
 // Note that there is no distinction between "string" and "string view" here.
 
-typedef struct
+struct String
 {
-    uint8 * data;
-    size len;
-} string_t;
+    uint8* data;
+    size   len;
+};
+typedef struct String String;
 
-#define string_sized(s, l) (string_t){(uint8 *)s, l}
-#define string(s) (string_t){(uint8 *)s, lengthof(s)}
+#define STRING_SIZED(s, l) (String){(uint8*)s, l}
+#define STRING(s)          (String){(uint8*)s, lengthof(s)}
 
-string_t string_extend(string_t string, uint8 c, arena_t * arena);
-string_t string_clone(string_t string, arena_t * arena);
-string_t string_from_char(char c, arena_t * arena);
+String String_Extend(String string, uint8 c, Arena* arena);
+String String_Clone(String string, Arena* arena);
+String String_FromChar(char c, Arena* arena);
 
 #endif // STRING_H
