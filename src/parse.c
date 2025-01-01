@@ -46,22 +46,22 @@ bool Parser_TokenKindIsOperator(TokenKind kind)
 {
     return kind == TK_PLUS
         || kind == TK_MINUS
-        || kind == TK_MULT
-        || kind == TK_DIV
-        || kind == TK_EXP;
+        || kind == TK_ASTERISK
+        || kind == TK_SLASH
+        || kind == TK_EXPONENT;
 }
 
 uint Parser_OperatorPrecedence(TokenKind op)
 {
-    // @TODO: add more ops as we go (^)
+    // Based on Pratt's parser logic.
     switch (op) {
         case TK_MINUS:
         case TK_PLUS:
             return 1;
-        case TK_MULT:
-        case TK_DIV:
+        case TK_ASTERISK:
+        case TK_SLASH:
             return 2;
-        case TK_EXP:
+        case TK_EXPONENT:
             return 3;
         default:
             return 0;
@@ -73,10 +73,10 @@ OperatorAssociativityType Parser_OperatorAssociativity(TokenKind op)
     switch (op) {
         case TK_MINUS:
         case TK_PLUS:
-        case TK_MULT:
-        case TK_DIV:
+        case TK_ASTERISK:
+        case TK_SLASH:
             return ASSOC_LEFT;
-        case TK_EXP:
+        case TK_EXPONENT:
             return ASSOC_RIGHT;
         default:
             return ASSOC_UNKNOWN;
@@ -118,7 +118,7 @@ ASTStatement* Parser_ParseStatement(Parser* parser)
 
     stmt->kind = ASTK_STMT;
 
-    if (parser->current_token.kind == TK_NUMBER) {
+    if (parser->current_token.kind == TK_NUMBER_LITERAL) {
         byte* scratch_node_buffer[16384];
         Arena scratch;
         Arena_Initialize(&scratch, scratch_node_buffer, 16384);

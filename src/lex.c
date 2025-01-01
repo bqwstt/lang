@@ -34,7 +34,6 @@ Lexer Lexer_Create(String code)
     lexer.literal_arena = literal_arena;
     lexer.cur_pos = 0;
     lexer.next_pos = 0;
-    lexer.spaces = 0;
     lexer.after_newline = false;
     return lexer;
 }
@@ -73,21 +72,6 @@ Token Lexer_ConsumeToken(Lexer* lexer)
         return token;
     }
 
-    // @TODO: handle blank lines?
-    while (lexer->current == ' ') {
-        lexer->spaces++;
-
-        if (lexer->after_newline && lexer->spaces == 4) {
-            token.kind = TK_SEP;
-            lexer->after_newline = false;
-            lexer->spaces = 0;
-            lexer->next_pos++;
-            return token;
-        }
-
-        Lexer_ReadChar(lexer);
-    }
-
     switch (lexer->current) {
         case '\n':
             lexer->after_newline = true;
@@ -101,13 +85,13 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_MINUS;
             break;
         case '*':
-            token.kind = TK_MULT;
+            token.kind = TK_ASTERISK;
             break;
         case '/':
-            token.kind = TK_DIV;
+            token.kind = TK_SLASH;
             break;
         case '^':
-            token.kind = TK_EXP;
+            token.kind = TK_EXPONENT;
             break;
         default:
             if (IS_DIGIT(lexer->current)) {
@@ -134,7 +118,7 @@ Token Lexer_ConsumeNumber(Lexer* lexer)
     }
 
     Token token;
-    token.kind = TK_NUMBER;
+    token.kind = TK_NUMBER_LITERAL;
     token.literal = number;
     return token;
 }

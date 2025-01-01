@@ -26,14 +26,53 @@ enum TokenKind
 {
     TK_UNKNOWN,
 
-    TK_SEP,
-    TK_MINUS,
-    TK_PLUS,
-    TK_MULT,
-    TK_DIV,
-    TK_EXP,
+    // One-character tokens
+    TK_PLUS, // +
+    TK_MINUS, // -
+    TK_ASTERISK, // *
+    TK_SLASH, // /
+    TK_EXPONENT, // ^
+    TK_DOT, // .
+    TK_COMMA, // ,
+    TK_COLON, // :
+    TK_SEMICOLON, // ;
+    TK_QUESTION_MARK, // ?
+    TK_EXCLAMATION_MARK, // !
+    TK_EQUALS, // =
+    TK_GREATER_THAN, // >
+    TK_LESS_THAN, // <
+    TK_CURLY_BRACE_OPEN, // {
+    TK_CURLY_BRACE_CLOSE, // }
+    TK_SQUARE_BRACKET_OPEN, // [
+    TK_SQUARE_BRACKET_CLOSE, // ]
+    TK_PARENTHESIS_OPEN, // (
+    TK_PARENTHESIS_CLOSE, // )
 
-    TK_NUMBER,
+    // Two-character tokens
+    TK_THIN_ARROW, // ->
+    TK_FAT_ARROW, // =>
+    TK_DOUBLE_EQUALS, // ==
+    TK_GREATER_OR_EQUALS_TO, // >=
+    TK_LESS_OR_EQUALS_TO, // <=
+    TK_ARRAY_BRACKETS, // []
+    TK_ASSIGNMENT_OPERATOR, // :=
+
+    // @TODO: Maybe we should have a dereference operator for both `*` and `?` types.
+    // @TODO: Should we have a "todo" symbol? Maybe `...`...?
+
+    // Literals
+    TK_NUMBER_LITERAL,
+    TK_STRING_LITERAL,
+
+    // Keywords
+    TK_FUNCTION,
+    TK_STRUCT,
+    TK_ENUM,
+    TK_IF,
+    TK_ELSE,
+    TK_RETURN,
+    TK_FOR,
+    TK_CASE,
 
     TK_ILLEGAL,
     TK_EOF,
@@ -41,19 +80,55 @@ enum TokenKind
 typedef enum TokenKind TokenKind;
 
 static const char* token_names[] = {
-    [TK_ILLEGAL] = "illegal",
+    [TK_UNKNOWN] = "unknown symbol",
 
-    [TK_SEP] = "separation",
-    [TK_MINUS] = "minus",
-    [TK_PLUS] = "plus",
-    [TK_MULT] = "multiply",
-    [TK_DIV] = "division",
-    [TK_EXP] = "exponent",
+    // One-character tokens
+    [TK_PLUS] = "plus sign",
+    [TK_MINUS] = "minus sign",
+    [TK_ASTERISK] = "asterisk",
+    [TK_SLASH] = "slash",
+    [TK_EXPONENT] = "exponent",
+    [TK_DOT] = "dot",
+    [TK_COMMA] = "comma",
+    [TK_COLON] = "colon",
+    [TK_SEMICOLON] = "semicolon",
+    [TK_QUESTION_MARK] = "question mark",
+    [TK_EXCLAMATION_MARK] = "exclamation mark",
+    [TK_EQUALS] = "equals sign",
+    [TK_GREATER_THAN] = "greather than sign",
+    [TK_LESS_THAN] = "less than sign",
+    [TK_CURLY_BRACE_OPEN] = "opening curly brace",
+    [TK_CURLY_BRACE_CLOSE] = "closing curly brace",
+    [TK_SQUARE_BRACKET_OPEN] = "opening square bracket",
+    [TK_SQUARE_BRACKET_CLOSE] = "closing square bracket",
+    [TK_PARENTHESIS_OPEN] = "opening parenthesis",
+    [TK_PARENTHESIS_CLOSE] = "closing parenthesis",
 
-    [TK_NUMBER] = "number",
+    // Two-character tokens
+    [TK_THIN_ARROW] = "thin arrow",
+    [TK_FAT_ARROW] = "fat arrow",
+    [TK_DOUBLE_EQUALS] = "double equals sign",
+    [TK_GREATER_OR_EQUALS_TO] = "greater than or equals to sign",
+    [TK_LESS_OR_EQUALS_TO] = "less than or equals to sign",
+    [TK_ARRAY_BRACKETS] = "array bracket specifier",
+    [TK_ASSIGNMENT_OPERATOR] = "assignment operator",
+
+    // Literals
+    [TK_NUMBER_LITERAL] = "number literal",
+    [TK_STRING_LITERAL] = "string literal",
+
+    // Keywords
+    [TK_FUNCTION] = "function keyword",
+    [TK_STRUCT] = "struct keyword",
+    [TK_ENUM] = "enum keyword",
+    [TK_IF] = "if keyword",
+    [TK_ELSE] = "else keyword",
+    [TK_RETURN] = "return keyword",
+    [TK_FOR] = "for keyword",
+    [TK_CASE] = "case keyword",
 
     [TK_EOF] = "end of file",
-    [TK_UNKNOWN] = "unknown",
+    [TK_ILLEGAL] = "illegal token",
 };
 
 struct Token
@@ -72,7 +147,6 @@ struct Lexer
 
     Arena literal_arena;
 
-    uint8 spaces;
     char current;
     bool after_newline;
 
