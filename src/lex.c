@@ -56,6 +56,13 @@ void Lexer_ReadChar(Lexer* lexer)
     lexer->cur_pos = lexer->next_pos++;
 }
 
+bool Lexer_Match(Lexer* lexer, char character)
+{
+    bool matched = character == Lexer_Peek(lexer);
+    if (matched) Lexer_ReadChar(lexer);
+    return matched;
+}
+
 Token Lexer_ConsumeToken(Lexer* lexer)
 {
     Token token;
@@ -86,6 +93,11 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_PLUS;
             break;
         case '-':
+            if (Lexer_Match(lexer, '>')) {
+                token.kind = TK_THIN_ARROW;
+                break;
+            }
+
             token.kind = TK_MINUS;
             break;
         case '*':
@@ -96,6 +108,86 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             break;
         case '^':
             token.kind = TK_EXPONENT;
+            break;
+        case '.':
+            token.kind = TK_DOT;
+            break;
+        case ',':
+            token.kind = TK_COMMA;
+            break;
+        case ':':
+            if (Lexer_Match(lexer, '=')) {
+                token.kind = TK_ASSIGNMENT_OPERATOR;
+                break;
+            }
+
+            token.kind = TK_COLON;
+            break;
+        case ';':
+            token.kind = TK_SEMICOLON;
+            break;
+        case '?':
+            token.kind = TK_QUESTION_MARK;
+            break;
+        case '!':
+            if (Lexer_Match(lexer, '=')) {
+                token.kind = TK_NOT_EQUALS;
+                break;
+            }
+
+            token.kind = TK_EXCLAMATION_MARK;
+            break;
+        case '=':
+            if (Lexer_Match(lexer, '=')) {
+                token.kind = TK_DOUBLE_EQUALS;
+                break;
+            }
+
+            if (Lexer_Match(lexer, '>')) {
+                token.kind = TK_FAT_ARROW;
+                break;
+            }
+            
+            token.kind = TK_EQUALS;
+            break;
+        case '>':
+            if (Lexer_Match(lexer, '=')) {
+                token.kind = TK_GREATER_OR_EQUALS_TO;
+                break;
+            }
+
+            token.kind = TK_GREATER_THAN;
+            break;
+        case '<':
+            if (Lexer_Match(lexer, '=')) {
+                token.kind = TK_LESS_OR_EQUALS_TO;
+                break;
+            }
+
+            token.kind = TK_LESS_THAN;
+            break;
+        case '{':
+            token.kind = TK_CURLY_BRACE_OPEN;
+            break;
+        case '}':
+            token.kind = TK_CURLY_BRACE_CLOSE;
+            break;
+        case '[':
+            if (Lexer_Match(lexer, ']')) {
+                token.kind = TK_ARRAY_BRACKETS;
+                break;
+            }
+
+            token.kind = TK_SQUARE_BRACKET_OPEN;
+            break;
+        case ']':
+            token.kind = TK_SQUARE_BRACKET_CLOSE;
+            break;
+        case '(':
+            token.kind = TK_PARENTHESIS_OPEN;
+            break;
+        case ')':
+            token.kind = TK_PARENTHESIS_CLOSE;
             break;
         default:
             if (IS_DIGIT(lexer->current)) {

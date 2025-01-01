@@ -52,11 +52,13 @@ enum TokenKind
     TK_THIN_ARROW, // ->
     TK_FAT_ARROW, // =>
     TK_DOUBLE_EQUALS, // ==
+    TK_NOT_EQUALS, // !=
     TK_GREATER_OR_EQUALS_TO, // >=
     TK_LESS_OR_EQUALS_TO, // <=
     TK_ARRAY_BRACKETS, // []
     TK_ASSIGNMENT_OPERATOR, // :=
 
+    // @TODO: +=, -= etc.
     // @TODO: Maybe we should have a dereference operator for both `*` and `?` types.
     // @TODO: Should we have a "todo" symbol? Maybe `...`...?
 
@@ -108,6 +110,7 @@ static const char* token_names[] = {
     [TK_THIN_ARROW] = "thin arrow",
     [TK_FAT_ARROW] = "fat arrow",
     [TK_DOUBLE_EQUALS] = "double equals sign",
+    [TK_NOT_EQUALS] = "not equals sign",
     [TK_GREATER_OR_EQUALS_TO] = "greater than or equals to sign",
     [TK_LESS_OR_EQUALS_TO] = "less than or equals to sign",
     [TK_ARRAY_BRACKETS] = "array bracket specifier",
@@ -158,6 +161,7 @@ Lexer Lexer_Create(String code);
 void  Lexer_Destroy(Lexer* lexer);
 char  Lexer_Peek(Lexer* lexer);
 void  Lexer_ReadChar(Lexer* lexer);
+bool  Lexer_Match(Lexer* lexer, char character);
 
 Token Lexer_ConsumeToken(Lexer* lexer);
 Token Lexer_ConsumeNumber(Lexer* lexer);
