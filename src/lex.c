@@ -72,6 +72,10 @@ Token Lexer_ConsumeToken(Lexer* lexer)
         return token;
     }
 
+    while (lexer->current == ' ') {
+        Lexer_ReadChar(lexer);
+    }
+
     switch (lexer->current) {
         case '\n':
             lexer->after_newline = true;
