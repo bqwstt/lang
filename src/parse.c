@@ -119,6 +119,7 @@ ASTStatement* Parser_ParseStatement(Parser* parser)
     stmt->kind = ASTK_STMT;
 
     if (parser->current_token.kind == TK_NUMBER_LITERAL) {
+        // @TODO: Check if these micro allocations are a bit too much.
         byte* scratch_node_buffer[16384];
         Arena scratch;
         Arena_Initialize(&scratch, scratch_node_buffer, 16384);
@@ -133,7 +134,7 @@ ASTStatement* Parser_ParseExpression(Parser* parser, uint8 prec_limit, Arena* sc
     // Implementation of a Pratt parser.
     // Wonderful article explaining this algorithm:
     // https://martin.janiczek.cz/2023/07/03/demystifying-pratt-parsers.html
-    ASTStatement* expr = AST_CREATE_NODE(scratch);
+    ASTStatement* expr = AST_CREATE_NODE(&parser->node_arena);
     assert(expr);
 
     expr->kind  = ASTK_EXPR;
