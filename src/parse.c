@@ -123,13 +123,13 @@ ASTStatement* Parser_ParseStatement(Parser* parser)
         byte* scratch_node_buffer[16384];
         Arena scratch;
         Arena_Initialize(&scratch, scratch_node_buffer, 16384);
-        stmt = Parser_ParseExpression(parser, 0, scratch);
+        stmt = Parser_ParseExpression(parser, 0, &scratch);
     }
 
     return stmt;
 }
 
-ASTStatement* Parser_ParseExpression(Parser* parser, uint8 prec_limit, Arena scratch)
+ASTStatement* Parser_ParseExpression(Parser* parser, uint8 prec_limit, Arena* scratch)
 {
     // Implementation of a Pratt parser.
     // Wonderful article explaining this algorithm:
@@ -158,7 +158,7 @@ ASTStatement* Parser_ParseExpression(Parser* parser, uint8 prec_limit, Arena scr
         Parser_ConsumeToken(parser);
 
         ASTStatement* right = Parser_ParseExpression(parser, final_prec, scratch);
-        ASTBinaryOp*  binop = AST_CREATE_NODE_SIZED(&scratch, sizeof(ASTBinaryOp));
+        ASTBinaryOp*  binop = AST_CREATE_NODE_SIZED(scratch, sizeof(ASTBinaryOp));
         assert(binop);
 
         binop->kind  = ASTK_BINARY;
