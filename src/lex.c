@@ -207,14 +207,16 @@ Token Lexer_ConsumeNumber(Lexer* lexer)
     String number = String_FromChar(lexer->current, &lexer->literal_arena);
 
     char next_digit = Lexer_Peek(lexer);
+    uint num_dots = 0;
     while (IS_DIGIT(next_digit) || next_digit == '.') {
         number = String_Extend(number, next_digit, &lexer->literal_arena);
         Lexer_ReadChar(lexer);
         next_digit = Lexer_Peek(lexer);
+        num_dots += (int)(next_digit == '.');
     }
 
     Token token;
-    token.kind = TK_NUMBER_LITERAL;
+    token.kind = num_dots > 1 ? TK_ILLEGAL : TK_NUMBER_LITERAL;
     token.literal = number;
     return token;
 }
