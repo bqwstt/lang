@@ -207,9 +207,8 @@ void parser_dump_ast(Parser* parser, ASTProgram* root)
     printf("│[Program]\n");
     for (uint i = 0; i < root->statements_len; ++i) {
         ASTNode* node = root->statements[i];
-        printf("└──│[Statement]\n");
-        printf("   └───[%s] ", ast_get_node_id(node));
-        ast_dump_node(node);
+        printf("└──│[Statement]");
+        ast_dump_node(node, 1, true);
         printf("\n");
     }
 }

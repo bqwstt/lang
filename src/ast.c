@@ -36,7 +36,7 @@ const char* ast_get_node_id(ASTNode* node)
     switch (node->kind) {
         case ASTK_EXPR:
         case ASTK_BINARY:
-            return "Expr";
+            return "Expression";
         case ASTK_STMT:
             return "Statement";
         case ASTK_IDENTIFIER:
@@ -48,32 +48,41 @@ const char* ast_get_node_id(ASTNode* node)
     }
 }
 
-void ast_dump_node(ASTNode* node)
+void ast_dump_node(ASTNode* node, uint8 depth, bool has_child)
 {
+    if (depth > 0) {
+        printf("\n");
+        uint spaces = depth * 4 - depth;
+        for (uint i = 0; i < spaces; ++i) {
+            printf(" ");
+        }
+
+        if (has_child) {
+            printf("└──│[%s] ", ast_get_node_id(node));
+        } else {
+            printf("└───[%s] ", ast_get_node_id(node));
+        }
+    }
+
     switch (node->kind) {
         case ASTK_EXPR:
         case ASTK_IDENTIFIER: {
             String literal = node->token.literal;
-            // @TODO: check if we have to do this instead?
-            /* printf("%.*s", (int32)literal.len, literal.data); */
             printf("%s", literal.data);
             break;
         }
         case ASTK_BINARY: {
             ASTBinaryOp* binop = cast(ASTBinaryOp*) node;
             const char* op = cast(const char*) binop->token.literal.data;
-            printf("(");
-            ast_dump_node(binop->left);
+            ast_dump_node(binop->left, 0, false);
             printf(" %s ", op);
-            ast_dump_node(binop->right);
-            printf(")");
+            ast_dump_node(binop->right, 0, false);
             break;
         }
         case ASTK_ASSIGNMENT: {
             ASTAssignment* assignment = cast(ASTAssignment*) node;
-            ast_dump_node(assignment->identifier);
-            printf(" := ");
-            ast_dump_node(assignment->expression);
+            ast_dump_node(assignment->identifier, depth+1, false);
+            ast_dump_node(assignment->expression, depth+1, false);
             break;
         }
         default:

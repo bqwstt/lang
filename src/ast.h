@@ -75,6 +75,6 @@ typedef struct ASTAssignment ASTAssignment;
 
 /* Helpers */
 const char* ast_get_node_id(ASTNode* node);
-void ast_dump_node(ASTNode* node);
+void ast_dump_node(ASTNode* node, uint8 depth, bool has_child);
 
 #endif // AST_H
