@@ -36,15 +36,15 @@ struct Arena
 };
 typedef struct Arena Arena;
 
-bool PtrIsPowerOfTwo(uintptr x);
+bool ptr_is_power_of_two(uintptr x);
 
-void Arena_Initialize(Arena* arena, void* buffer, size buffer_length);
-void Arena_Free(Arena* arena);
+void arena_initialize(Arena* arena, void* buffer, size buffer_length);
+void arena_free(Arena* arena);
 
-uintptr Arena_AlignForward(uintptr ptr, size align);
-void* Arena_AllocAligned(Arena* arena, size sz, size align);
-void* Arena_Alloc(Arena* arena, size sz);
-void* Arena_ResizeAligned(Arena* arena, void* old_memory, size old_sz, size new_sz, size align);
-void* Arena_Resize(Arena* arena, void* old_memory, size old_sz, size new_sz);
+uintptr arena_align_forward(uintptr ptr, size align);
+void* arena_alloc_aligned(Arena* arena, size sz, size align);
+void* arena_alloc(Arena* arena, size sz);
+void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new_sz, size align);
+void* arena_resize(Arena* arena, void* old_memory, size old_sz, size new_sz);
 
 #endif // ARENA_H

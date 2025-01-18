@@ -19,8 +19,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#define AST_CREATE_NODE(arena)           Arena_Alloc(arena, sizeof(ASTNode))
-#define AST_CREATE_NODE_SIZED(arena, sz) Arena_Alloc(arena, sz)
+#define AST_CREATE_NODE(arena)           arena_alloc(arena, sizeof(ASTNode))
+#define AST_CREATE_NODE_SIZED(arena, sz) arena_alloc(arena, sz)
 
 ASTProgram AST_CreateProgramNode()
 {
@@ -29,7 +29,7 @@ ASTProgram AST_CreateProgramNode()
     return program;
 }
 
-const char* AST_GetNodeID(ASTNode* node)
+const char* ast_get_node_id(ASTNode* node)
 {
     switch (node->kind) {
         case ASTK_EXPR:
@@ -42,7 +42,7 @@ const char* AST_GetNodeID(ASTNode* node)
     }
 }
 
-void AST_DumpNode(ASTNode* node)
+void ast_dump_node(ASTNode* node)
 {
     switch (node->kind) {
         case ASTK_EXPR: {
@@ -57,9 +57,9 @@ void AST_DumpNode(ASTNode* node)
             ASTBinaryOp* binop = (ASTBinaryOp*)node;
             const char* op = token_names[binop->token.kind];
             printf("(");
-            AST_DumpNode(binop->left);
+            ast_dump_node(binop->left);
             printf(" %s ", op);
-            AST_DumpNode(binop->right);
+            ast_dump_node(binop->right);
             printf(")");
             break;
         }

@@ -50,10 +50,10 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    String code = IO_ReadFileContentsFromFilepath(argv[1]);
-    Lexer lexer = Lexer_Create(code);
-    Parser parser = Parser_Create(&lexer);
-    Parser_Parse(&parser);
-    Parser_Destroy(&parser);
+    String code = io_read_file_from_path(argv[1]);
+    Lexer lexer = lexer_create(code);
+    Parser parser = parser_create(&lexer);
+    parser_parse(&parser);
+    parser_destroy(&parser);
     return 0;
 }

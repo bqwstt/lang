@@ -19,12 +19,12 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bool PtrIsPowerOfTwo(uintptr x)
+bool ptr_is_power_of_two(uintptr x)
 {
     return (x & (x-1)) == 0;
 }
 
-void Arena_Initialize(Arena* arena, void* buffer, size buffer_length)
+void arena_initialize(Arena* arena, void* buffer, size buffer_length)
 {
     arena->buf = (byte*)buffer;
     arena->buf_len = buffer_length;
@@ -32,15 +32,15 @@ void Arena_Initialize(Arena* arena, void* buffer, size buffer_length)
     arena->prev_offset = 0;
 }
 
-void Arena_Free(Arena* arena)
+void arena_free(Arena* arena)
 {
     arena->curr_offset = 0;
     arena->prev_offset = 0;
 }
 
-uintptr Arena_AlignForward(uintptr ptr, size align)
+uintptr arena_align_forward(uintptr ptr, size align)
 {
-    // @TODO: debug_assert(PtrIsPowerOfTwo(align));
+    // @TODO: debug_assert(ptr_is_power_of_two(align));
     uintptr p = ptr;
     uintptr a = (uintptr)align;
     uintptr modulo = p & (a - 1);
@@ -52,10 +52,10 @@ uintptr Arena_AlignForward(uintptr ptr, size align)
     return p;
 }
 
-void* Arena_AllocAligned(Arena* arena, size sz, size align)
+void* arena_alloc_aligned(Arena* arena, size sz, size align)
 {
     uintptr curr_ptr = (uintptr)arena->buf + (uintptr)arena->curr_offset;
-    uintptr offset = Arena_AlignForward(curr_ptr, align);
+    uintptr offset = arena_align_forward(curr_ptr, align);
     offset -= (uintptr)arena->buf;
 
     // Check for space left
@@ -71,17 +71,17 @@ void* Arena_AllocAligned(Arena* arena, size sz, size align)
     return NULL;
 }
 
-void* Arena_Alloc(Arena* arena, size sz)
+void* arena_alloc(Arena* arena, size sz)
 {
-    return Arena_AllocAligned(arena, sz, DEFAULT_ARENA_ALIGNMENT);
+    return arena_alloc_aligned(arena, sz, DEFAULT_ARENA_ALIGNMENT);
 }
 
-void* Arena_ResizeAligned(Arena* arena, void* old_memory, size old_sz, size new_sz, size align) {
-    // @TODO: debug_assert(PtrIsPowerOfTwo(align));
+void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new_sz, size align) {
+    // @TODO: debug_assert(ptr_is_power_of_two(align));
     byte* old_mem = (byte*)old_memory;
 
     if (old_mem == NULL || old_sz == 0) {
-        return Arena_AllocAligned(arena, new_sz, align);
+        return arena_alloc_aligned(arena, new_sz, align);
     } else if (arena->buf <= old_mem && old_mem < arena->buf + arena->buf_len) {
         if (arena->buf + arena->prev_offset == old_mem) {
             arena->curr_offset = arena->prev_offset + new_sz;
@@ -91,7 +91,7 @@ void* Arena_ResizeAligned(Arena* arena, void* old_memory, size old_sz, size new_
 
             return old_memory;
         } else {
-            void* new_memory = Arena_AllocAligned(arena, new_sz, align);
+            void* new_memory = arena_alloc_aligned(arena, new_sz, align);
             size_t copy_sz = 0;
             if (old_sz < new_sz)
                 copy_sz = old_sz;
@@ -108,6 +108,6 @@ void* Arena_ResizeAligned(Arena* arena, void* old_memory, size old_sz, size new_
     }
 }
 
-void* Arena_Resize(Arena* arena, void* old_memory, size old_sz, size new_sz) {
-    return Arena_ResizeAligned(arena, old_memory, old_sz, new_sz, DEFAULT_ARENA_ALIGNMENT);
+void* arena_resize(Arena* arena, void* old_memory, size old_sz, size new_sz) {
+    return arena_resize_aligned(arena, old_memory, old_sz, new_sz, DEFAULT_ARENA_ALIGNMENT);
 }

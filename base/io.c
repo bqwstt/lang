@@ -19,7 +19,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-String IO_ReadFileContentsFromFilepath(const char* filename)
+String io_read_file_from_path(const char* filename)
 {
     // @TODO: proper error checking
     int fd = open(filename, O_RDONLY);

@@ -157,13 +157,14 @@ struct Lexer
 };
 typedef struct Lexer Lexer;
 
-Lexer Lexer_Create(String code);
-void  Lexer_Destroy(Lexer* lexer);
-char  Lexer_Peek(Lexer* lexer);
-void  Lexer_ReadChar(Lexer* lexer);
-bool  Lexer_Match(Lexer* lexer, char character);
+Lexer lexer_create(String code);
+void  lexer_destroy(Lexer* lexer);
+char  lexer_peek(Lexer* lexer);
+void  lexer_read_char(Lexer* lexer);
+bool  lexer_match(Lexer* lexer, char character);
 
-Token Lexer_ConsumeToken(Lexer* lexer);
-Token Lexer_ConsumeNumber(Lexer* lexer);
+Token lexer_consume_token(Lexer* lexer);
+Token lexer_consume_number(Lexer* lexer);
+Token lexer_consume_string(Lexer* lexer);
 
 #endif // LEX_H

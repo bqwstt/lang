@@ -61,7 +61,7 @@ struct ASTBinaryOp
 typedef struct ASTBinaryOp ASTBinaryOp;
 
 /* Helpers */
-const char* AST_GetNodeID(ASTNode* node);
-void AST_DumpNode(ASTNode* node);
+const char* ast_get_node_id(ASTNode* node);
+void ast_dump_node(ASTNode* node);
 
 #endif // AST_H

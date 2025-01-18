@@ -40,20 +40,20 @@ enum OperatorAssociativityType
 };
 typedef enum OperatorAssociativityType OperatorAssociativityType;
 
-Parser Parser_CreateParser(Lexer* lexer);
-void   Parser_DestroyParser(Parser* parser);
-void   Parser_ConsumeToken(Parser* parser);
-void   Parser_Parse(Parser* parser);
+Parser parser_create(Lexer* lexer);
+void   parser_destroy(Parser* parser);
+void   parser_consume_token(Parser* parser);
+void   parser_parse(Parser* parser);
 
 /* Helpers */
-bool Parser_TokenKindIsOperator(TokenKind kind);
-uint Parser_OperatorPrecedence(TokenKind op);
-OperatorAssociativityType Parser_OperatorAssociativity(TokenKind op);
+bool parser_token_kind_is_operator(TokenKind kind);
+uint parser_operator_precedence(TokenKind op);
+OperatorAssociativityType parser_operator_associativity(TokenKind op);
 
 /* Parsing functions */
-ASTStatement* Parser_ParseStatement(Parser* parser);
-ASTStatement* Parser_ParseExpression(Parser* parser, uint8 prec_limit, Arena* scratch);
+ASTStatement* parser_parse_statement(Parser* parser);
+ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* scratch);
 
-void Parser_DumpAST(Parser* parser, ASTProgram* root);
+void parser_dump_ast(Parser* parser, ASTProgram* root);
 
 #endif // PARSE_H

@@ -24,10 +24,10 @@
 #define LEXER_LITERAL_LIMIT 131072
 static byte* literal_buffer[LEXER_LITERAL_LIMIT];
 
-Lexer Lexer_Create(String code)
+Lexer lexer_create(String code)
 {
     Arena literal_arena;
-    Arena_Initialize(&literal_arena, literal_buffer, LEXER_LITERAL_LIMIT);
+    arena_initialize(&literal_arena, literal_buffer, LEXER_LITERAL_LIMIT);
 
     Lexer lexer;
     lexer.code = code;
@@ -38,32 +38,32 @@ Lexer Lexer_Create(String code)
     return lexer;
 }
 
-void Lexer_Destroy(Lexer* lexer)
+void lexer_destroy(Lexer* lexer)
 {
-    Arena_Free(&lexer->literal_arena);
+    arena_free(&lexer->literal_arena);
 }
 
-char Lexer_Peek(Lexer* lexer)
+char lexer_peek(Lexer* lexer)
 {
     assert(lexer->code.data);
     return lexer->code.data[lexer->next_pos];
 }
 
-void Lexer_ReadChar(Lexer* lexer)
+void lexer_read_char(Lexer* lexer)
 {
     assert(lexer->code.data);
     lexer->current = lexer->code.data[lexer->next_pos];
     lexer->cur_pos = lexer->next_pos++;
 }
 
-bool Lexer_Match(Lexer* lexer, char character)
+bool lexer_match(Lexer* lexer, char character)
 {
-    bool matched = character == Lexer_Peek(lexer);
-    if (matched) Lexer_ReadChar(lexer);
+    bool matched = character == lexer_peek(lexer);
+    if (matched) lexer_read_char(lexer);
     return matched;
 }
 
-Token Lexer_ConsumeToken(Lexer* lexer)
+Token lexer_consume_token(Lexer* lexer)
 {
     Token token;
     token.kind = TK_UNKNOWN;
@@ -73,14 +73,14 @@ Token Lexer_ConsumeToken(Lexer* lexer)
 
     if (lexer->next_pos < lexer->code.len
         && lexer->code.data[lexer->next_pos] != '\0') {
-        Lexer_ReadChar(lexer);
+        lexer_read_char(lexer);
     } else {
         token.kind = TK_EOF;
         return token;
     }
 
     while (lexer->current == ' ') {
-        Lexer_ReadChar(lexer);
+        lexer_read_char(lexer);
     }
 
     switch (lexer->current) {
@@ -93,7 +93,7 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_PLUS;
             break;
         case '-':
-            if (Lexer_Match(lexer, '>')) {
+            if (lexer_match(lexer, '>')) {
                 token.kind = TK_THIN_ARROW;
                 break;
             }
@@ -116,7 +116,7 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_COMMA;
             break;
         case ':':
-            if (Lexer_Match(lexer, '=')) {
+            if (lexer_match(lexer, '=')) {
                 token.kind = TK_ASSIGNMENT_OPERATOR;
                 break;
             }
@@ -130,7 +130,7 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_QUESTION_MARK;
             break;
         case '!':
-            if (Lexer_Match(lexer, '=')) {
+            if (lexer_match(lexer, '=')) {
                 token.kind = TK_NOT_EQUALS;
                 break;
             }
@@ -138,12 +138,12 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_EXCLAMATION_MARK;
             break;
         case '=':
-            if (Lexer_Match(lexer, '=')) {
+            if (lexer_match(lexer, '=')) {
                 token.kind = TK_DOUBLE_EQUALS;
                 break;
             }
 
-            if (Lexer_Match(lexer, '>')) {
+            if (lexer_match(lexer, '>')) {
                 token.kind = TK_FAT_ARROW;
                 break;
             }
@@ -151,7 +151,7 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_EQUALS;
             break;
         case '>':
-            if (Lexer_Match(lexer, '=')) {
+            if (lexer_match(lexer, '=')) {
                 token.kind = TK_GREATER_OR_EQUALS_TO;
                 break;
             }
@@ -159,7 +159,7 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_GREATER_THAN;
             break;
         case '<':
-            if (Lexer_Match(lexer, '=')) {
+            if (lexer_match(lexer, '=')) {
                 token.kind = TK_LESS_OR_EQUALS_TO;
                 break;
             }
@@ -173,7 +173,7 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             token.kind = TK_CURLY_BRACE_CLOSE;
             break;
         case '[':
-            if (Lexer_Match(lexer, ']')) {
+            if (lexer_match(lexer, ']')) {
                 token.kind = TK_ARRAY_BRACKETS;
                 break;
             }
@@ -191,7 +191,7 @@ Token Lexer_ConsumeToken(Lexer* lexer)
             break;
         default:
             if (IS_DIGIT(lexer->current)) {
-                token = Lexer_ConsumeNumber(lexer);
+                token = lexer_consume_number(lexer);
                 break;
             }
 
@@ -202,21 +202,28 @@ Token Lexer_ConsumeToken(Lexer* lexer)
     return token;
 }
 
-Token Lexer_ConsumeNumber(Lexer* lexer)
+Token lexer_consume_number(Lexer* lexer)
 {
-    String number = String_FromChar(lexer->current, &lexer->literal_arena);
+    String number = string_from_char(lexer->current, &lexer->literal_arena);
 
-    char next_digit = Lexer_Peek(lexer);
+    char next_digit = lexer_peek(lexer);
     uint num_dots = 0;
     while (IS_DIGIT(next_digit) || next_digit == '.') {
-        number = String_Extend(number, next_digit, &lexer->literal_arena);
-        Lexer_ReadChar(lexer);
-        next_digit = Lexer_Peek(lexer);
+        number = string_append(number, next_digit, &lexer->literal_arena);
+        lexer_read_char(lexer);
+        next_digit = lexer_peek(lexer);
         num_dots += (int)(next_digit == '.');
     }
 
     Token token;
     token.kind = num_dots > 1 ? TK_ILLEGAL : TK_NUMBER_LITERAL;
     token.literal = number;
+    return token;
+}
+
+Token lexer_consume_string(Lexer* lexer)
+{
+    // @TODO: consume identifiers + keywords
+    Token token;
     return token;
 }

@@ -35,8 +35,8 @@ typedef struct String String;
 #define STRING_SIZED(s, l) (String){(uint8*)s, l}
 #define STRING(s)          (String){(uint8*)s, lengthof(s)}
 
-String String_Extend(String string, uint8 c, Arena* arena);
-String String_Clone(String string, Arena* arena);
-String String_FromChar(char c, Arena* arena);
+String string_append(String string, uint8 c, Arena* arena);
+String string_clone(String string, Arena* arena);
+String string_from_char(char c, Arena* arena);
 
 #endif // STRING_H
