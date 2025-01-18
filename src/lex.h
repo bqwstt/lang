@@ -57,6 +57,9 @@ enum TokenKind
     TK_LESS_OR_EQUALS_TO, // <=
     TK_ARRAY_BRACKETS, // []
     TK_ASSIGNMENT_OPERATOR, // :=
+    TK_DEFINITION_OPERATOR, // ::
+    TK_LOGICAL_OR, // ||
+    TK_LOGICAL_AND, // &&
 
     // @TODO: +=, -= etc.
     // @TODO: Maybe we should have a dereference operator for both `*` and `?` types.
@@ -67,14 +70,14 @@ enum TokenKind
     TK_STRING_LITERAL,
 
     // Keywords
-    TK_FUNCTION,
     TK_STRUCT,
     TK_ENUM,
     TK_IF,
     TK_ELSE,
     TK_RETURN,
     TK_FOR,
-    TK_CASE,
+
+    TK_IDENTIFIER,
 
     TK_ILLEGAL,
     TK_EOF,
@@ -82,56 +85,59 @@ enum TokenKind
 typedef enum TokenKind TokenKind;
 
 static const char* token_names[] = {
-    [TK_UNKNOWN] = "unknown symbol",
+    [TK_UNKNOWN] = "an unknown symbol",
 
     // One-character tokens
-    [TK_PLUS] = "plus sign",
-    [TK_MINUS] = "minus sign",
-    [TK_ASTERISK] = "asterisk",
-    [TK_SLASH] = "slash",
-    [TK_EXPONENT] = "exponent",
-    [TK_DOT] = "dot",
-    [TK_COMMA] = "comma",
-    [TK_COLON] = "colon",
-    [TK_SEMICOLON] = "semicolon",
-    [TK_QUESTION_MARK] = "question mark",
-    [TK_EXCLAMATION_MARK] = "exclamation mark",
-    [TK_EQUALS] = "equals sign",
-    [TK_GREATER_THAN] = "greather than sign",
-    [TK_LESS_THAN] = "less than sign",
-    [TK_CURLY_BRACE_OPEN] = "opening curly brace",
-    [TK_CURLY_BRACE_CLOSE] = "closing curly brace",
-    [TK_SQUARE_BRACKET_OPEN] = "opening square bracket",
-    [TK_SQUARE_BRACKET_CLOSE] = "closing square bracket",
-    [TK_PARENTHESIS_OPEN] = "opening parenthesis",
-    [TK_PARENTHESIS_CLOSE] = "closing parenthesis",
+    [TK_PLUS] = "a plus sign",
+    [TK_MINUS] = "a minus sign",
+    [TK_ASTERISK] = "an asterisk",
+    [TK_SLASH] = "a slash",
+    [TK_EXPONENT] = "an exponent",
+    [TK_DOT] = "a dot",
+    [TK_COMMA] = "a comma",
+    [TK_COLON] = "a colon",
+    [TK_SEMICOLON] = "a semicolon",
+    [TK_QUESTION_MARK] = "a question mark",
+    [TK_EXCLAMATION_MARK] = "an exclamation mark",
+    [TK_EQUALS] = "an equals sign",
+    [TK_GREATER_THAN] = "a greater than sign",
+    [TK_LESS_THAN] = "a less than sign",
+    [TK_CURLY_BRACE_OPEN] = "an opening curly brace",
+    [TK_CURLY_BRACE_CLOSE] = "a closing curly brace",
+    [TK_SQUARE_BRACKET_OPEN] = "an opening square bracket",
+    [TK_SQUARE_BRACKET_CLOSE] = "a closing square bracket",
+    [TK_PARENTHESIS_OPEN] = "an opening parenthesis",
+    [TK_PARENTHESIS_CLOSE] = "a closing parenthesis",
 
     // Two-character tokens
-    [TK_THIN_ARROW] = "thin arrow",
-    [TK_FAT_ARROW] = "fat arrow",
-    [TK_DOUBLE_EQUALS] = "double equals sign",
-    [TK_NOT_EQUALS] = "not equals sign",
-    [TK_GREATER_OR_EQUALS_TO] = "greater than or equals to sign",
-    [TK_LESS_OR_EQUALS_TO] = "less than or equals to sign",
-    [TK_ARRAY_BRACKETS] = "array bracket specifier",
-    [TK_ASSIGNMENT_OPERATOR] = "assignment operator",
+    [TK_THIN_ARROW] = "a return type specifier",
+    [TK_FAT_ARROW] = "a type matching case",
+    [TK_DOUBLE_EQUALS] = "a double equals sign",
+    [TK_NOT_EQUALS] = "a not equals sign",
+    [TK_GREATER_OR_EQUALS_TO] = "a greater than or equals to sign",
+    [TK_LESS_OR_EQUALS_TO] = "a less than or equals to sign",
+    [TK_ARRAY_BRACKETS] = "an array bracket specifier",
+    [TK_ASSIGNMENT_OPERATOR] = "an assignment operator",
+    [TK_DEFINITION_OPERATOR] = "a definition operator",
+    [TK_LOGICAL_OR] = "a logical OR operator",
+    [TK_LOGICAL_AND] = "a logical AND operator",
 
     // Literals
-    [TK_NUMBER_LITERAL] = "number literal",
-    [TK_STRING_LITERAL] = "string literal",
+    [TK_NUMBER_LITERAL] = "a number literal",
+    [TK_STRING_LITERAL] = "a string literal",
 
     // Keywords
-    [TK_FUNCTION] = "function keyword",
-    [TK_STRUCT] = "struct keyword",
-    [TK_ENUM] = "enum keyword",
-    [TK_IF] = "if keyword",
-    [TK_ELSE] = "else keyword",
-    [TK_RETURN] = "return keyword",
-    [TK_FOR] = "for keyword",
-    [TK_CASE] = "case keyword",
+    [TK_STRUCT] = "a struct keyword",
+    [TK_ENUM] = "an enum keyword",
+    [TK_IF] = "an if keyword",
+    [TK_ELSE] = "an else keyword",
+    [TK_RETURN] = "a return keyword",
+    [TK_FOR] = "a for keyword",
 
-    [TK_EOF] = "end of file",
-    [TK_ILLEGAL] = "illegal token",
+    [TK_IDENTIFIER] = "an identifier",
+
+    [TK_EOF] = "the end of file",
+    [TK_ILLEGAL] = "an illegal token",
 };
 
 struct Token
@@ -152,11 +158,12 @@ struct Lexer
     Arena literal_arena;
 
     char current;
-    bool after_newline;
 
     String code;
 };
 typedef struct Lexer Lexer;
+
+void token_dump(Token* token);
 
 Lexer lexer_create(String code);
 void  lexer_destroy(Lexer* lexer);

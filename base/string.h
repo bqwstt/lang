@@ -38,5 +38,6 @@ typedef struct String String;
 String string_append(String string, uint8 c, Arena* arena);
 String string_clone(String string, Arena* arena);
 String string_from_char(char c, Arena* arena);
+bool string_equals(String* string1, String* string2);
 
 #endif // STRING_H

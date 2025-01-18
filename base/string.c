@@ -21,6 +21,7 @@
 
 String string_append(String string, uint8 c, Arena* arena)
 {
+    // @FIXME: This is not the fastest approach.
     uint8* new_data = cast(uint8*) arena_alloc(arena, string.len+1);
     assert(new_data);
 
@@ -51,4 +52,15 @@ String string_from_char(char c, Arena* arena)
 
     data[0] = cast(uint8) c;
     return STRING_SIZED(data, 1);
+}
+
+bool string_equals(String* string1, String* string2) {
+    if (string1->len != string2->len) return false;
+    for (size i = 0; i < string1->len; ++i) {
+        if (string1->data[i] != string2->data[i]) {
+            return false;
+        }
+    }
+
+    return true;
 }
