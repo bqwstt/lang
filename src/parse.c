@@ -183,14 +183,16 @@ ASTStatement* parser_parse_assignment(Parser* parser, Arena* scratch)
     identifier->kind = ASTK_IDENTIFIER;
     identifier->token = parser->current_token;
 
-    // Consume both the identifier and assignment operator.
-    parser_consume_token(parser);
-    parser_consume_token(parser);
-
     ASTAssignment* assignment = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ASTAssignment));
     assert(assignment);
 
     assignment->kind = ASTK_ASSIGNMENT;
+    assignment->token = parser->next_token;
+
+    // Consume both the identifier and assignment operator.
+    parser_consume_token(parser);
+    parser_consume_token(parser);
+
     assignment->identifier = identifier;
     assignment->expression = cast(ASTExpression*) parser_parse_expression(parser, 0, scratch);
 
