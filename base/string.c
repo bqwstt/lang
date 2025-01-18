@@ -21,7 +21,7 @@
 
 String string_append(String string, uint8 c, Arena* arena)
 {
-    uint8* new_data = arena_alloc(arena, string.len+1);
+    uint8* new_data = cast(uint8*) arena_alloc(arena, string.len+1);
     assert(new_data);
 
     for (size i = 0; i < string.len; ++i) {
@@ -34,7 +34,7 @@ String string_append(String string, uint8 c, Arena* arena)
 
 String string_clone(String string, Arena* arena)
 {
-    uint8* new_data = arena_alloc(arena, string.len);
+    uint8* new_data = cast(uint8*) arena_alloc(arena, string.len);
     assert(new_data);
 
     for (size i = 0; i < string.len; ++i) {
@@ -46,9 +46,9 @@ String string_clone(String string, Arena* arena)
 
 String string_from_char(char c, Arena* arena)
 {
-    uint8* data = arena_alloc(arena, 1);
+    uint8* data = cast(uint8*) arena_alloc(arena, 1);
     assert(data);
 
-    data[0] = (uint8)c;
+    data[0] = cast(uint8) c;
     return STRING_SIZED(data, 1);
 }

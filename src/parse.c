@@ -158,15 +158,15 @@ ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* s
         parser_consume_token(parser);
 
         ASTStatement* right = parser_parse_expression(parser, final_prec, scratch);
-        ASTBinaryOp*  binop = AST_CREATE_NODE_SIZED(scratch, sizeof(ASTBinaryOp));
+        ASTBinaryOp* binop = AST_CREATE_NODE_SIZED(scratch, sizeof(ASTBinaryOp));
         assert(binop);
 
-        binop->kind  = ASTK_BINARY;
-        binop->left  = expr;
+        binop->kind = ASTK_BINARY;
+        binop->left = expr;
         binop->right = right;
         binop->token = op_token;
 
-        expr = (ASTStatement*)binop;
+        expr = cast(ASTStatement*) binop;
     };
 
     return expr;

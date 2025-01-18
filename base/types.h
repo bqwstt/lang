@@ -36,4 +36,6 @@ typedef size_t size;
 #define countof(a)  (size)(sizeof(a) / sizeof(*(a)))
 #define lengthof(s) (countof(s) - 1)
 
+#define cast(X) (X)
+
 #endif // TYPES_H

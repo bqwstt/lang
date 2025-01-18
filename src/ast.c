@@ -54,7 +54,7 @@ void ast_dump_node(ASTNode* node)
             break;
         }
         case ASTK_BINARY: {
-            ASTBinaryOp* binop = (ASTBinaryOp*)node;
+            ASTBinaryOp* binop = cast(ASTBinaryOp*) node;
             const char* op = token_names[binop->token.kind];
             printf("(");
             ast_dump_node(binop->left);

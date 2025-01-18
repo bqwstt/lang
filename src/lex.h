@@ -138,6 +138,7 @@ struct Token
 {
     TokenKind kind; 
     String literal;
+    // @TODO: remove these and use a pointer to location instead
     uint column;
     uint line;
 };

@@ -27,7 +27,7 @@
 void* memset(void* dest, int val, size len)
 {
     byte* ptr = dest;
-    while (len-- > 0)*ptr++ = val;
+    while (len-- > 0) *ptr++ = val;
 
     return dest;
 }
@@ -38,12 +38,12 @@ void* memmove(void* dest, const void* src, size len)
     const char* s = src;
 
     if (d < s)
-        while (len--)*d++ =*s++;
+        while (len--) *d++ =*s++;
     else {
         char* lasts = s + (len-1);
         char* lastd = d + (len-1);
 
-        while (len--)*lastd-- = *lasts--;
+        while (len--) *lastd-- = *lasts--;
     }
 
     return dest;

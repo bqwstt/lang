@@ -26,7 +26,8 @@ String io_read_file_from_path(const char* filename)
     assert(fd != -1);
 
     offset len = lseek(fd, 0, SEEK_END);
-    uint8* data = (uint8 *)mmap(0, len, PROT_READ, MAP_PRIVATE, fd, 0);
+    // @FIXME: This does not compile on Windows.
+    uint8* data = cast(uint8*) mmap(0, len, PROT_READ, MAP_PRIVATE, fd, 0);
     assert(data != MAP_FAILED);
 
     String contents = STRING("");

@@ -26,7 +26,7 @@ bool ptr_is_power_of_two(uintptr x)
 
 void arena_initialize(Arena* arena, void* buffer, size buffer_length)
 {
-    arena->buf = (byte*)buffer;
+    arena->buf = cast(byte*) buffer;
     arena->buf_len = buffer_length;
     arena->curr_offset = 0;
     arena->prev_offset = 0;
@@ -42,7 +42,7 @@ uintptr arena_align_forward(uintptr ptr, size align)
 {
     // @TODO: debug_assert(ptr_is_power_of_two(align));
     uintptr p = ptr;
-    uintptr a = (uintptr)align;
+    uintptr a = cast(uintptr) align;
     uintptr modulo = p & (a - 1);
 
     if (modulo != 0) {
@@ -54,9 +54,9 @@ uintptr arena_align_forward(uintptr ptr, size align)
 
 void* arena_alloc_aligned(Arena* arena, size sz, size align)
 {
-    uintptr curr_ptr = (uintptr)arena->buf + (uintptr)arena->curr_offset;
+    uintptr curr_ptr = cast(uintptr) arena->buf + cast(uintptr) arena->curr_offset;
     uintptr offset = arena_align_forward(curr_ptr, align);
-    offset -= (uintptr)arena->buf;
+    offset -= cast(uintptr) arena->buf;
 
     // Check for space left
     if (offset + sz <= arena->buf_len) {
@@ -78,7 +78,7 @@ void* arena_alloc(Arena* arena, size sz)
 
 void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new_sz, size align) {
     // @TODO: debug_assert(ptr_is_power_of_two(align));
-    byte* old_mem = (byte*)old_memory;
+    byte* old_mem = cast(byte*) old_memory;
 
     if (old_mem == NULL || old_sz == 0) {
         return arena_alloc_aligned(arena, new_sz, align);

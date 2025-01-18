@@ -212,7 +212,7 @@ Token lexer_consume_number(Lexer* lexer)
         number = string_append(number, next_digit, &lexer->literal_arena);
         lexer_read_char(lexer);
         next_digit = lexer_peek(lexer);
-        num_dots += (int)(next_digit == '.');
+        num_dots += cast(int) (next_digit == '.');
     }
 
     Token token;
