@@ -29,6 +29,8 @@ ASTProgram AST_CreateProgramNode()
     return program;
 }
 
+// @FIXME: Maybe follow the same approach as we do for tokens,
+// where this is a plain array. Check what's faster.
 const char* ast_get_node_id(ASTNode* node)
 {
     switch (node->kind) {
@@ -37,6 +39,10 @@ const char* ast_get_node_id(ASTNode* node)
             return "Expr";
         case ASTK_STMT:
             return "Statement";
+        case ASTK_IDENTIFIER:
+            return "Identifier";
+        case ASTK_ASSIGNMENT:
+            return "Assignment";
         default:
             return "Unknown";
     }
@@ -45,9 +51,9 @@ const char* ast_get_node_id(ASTNode* node)
 void ast_dump_node(ASTNode* node)
 {
     switch (node->kind) {
-        case ASTK_EXPR: {
-            ASTNode* expr = node;
-            String literal = expr->token.literal;
+        case ASTK_EXPR:
+        case ASTK_IDENTIFIER: {
+            String literal = node->token.literal;
             // @TODO: check if we have to do this instead?
             /* printf("%.*s", (int32)literal.len, literal.data); */
             printf("%s", literal.data);
@@ -55,12 +61,19 @@ void ast_dump_node(ASTNode* node)
         }
         case ASTK_BINARY: {
             ASTBinaryOp* binop = cast(ASTBinaryOp*) node;
-            const char* op = token_names[binop->token.kind];
+            const char* op = cast(const char*) binop->token.literal.data;
             printf("(");
             ast_dump_node(binop->left);
             printf(" %s ", op);
             ast_dump_node(binop->right);
             printf(")");
+            break;
+        }
+        case ASTK_ASSIGNMENT: {
+            ASTAssignment* assignment = cast(ASTAssignment*) node;
+            ast_dump_node(assignment->identifier);
+            printf(" := ");
+            ast_dump_node(assignment->expression);
             break;
         }
         default:

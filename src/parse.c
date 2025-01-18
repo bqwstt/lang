@@ -118,12 +118,20 @@ ASTStatement* parser_parse_statement(Parser* parser)
 
     stmt->kind = ASTK_STMT;
 
+    // @TODO: Check if these micro allocations are a bit too much.
+    byte* scratch_node_buffer[16384];
+    Arena scratch;
+    arena_initialize(&scratch, scratch_node_buffer, 16384);
+
     if (parser->current_token.kind == TK_NUMBER_LITERAL) {
-        // @TODO: Check if these micro allocations are a bit too much.
-        byte* scratch_node_buffer[16384];
-        Arena scratch;
-        arena_initialize(&scratch, scratch_node_buffer, 16384);
         stmt = parser_parse_expression(parser, 0, &scratch);
+    } else if (parser->next_token.kind == TK_ASSIGNMENT_OPERATOR) {
+        printf("Parser's current_token is %s (with literal '%s'), next_token is %s (with literal '%s')\n",
+            token_names[parser->current_token.kind],
+            parser->current_token.literal.data,
+            token_names[parser->next_token.kind],
+            parser->next_token.literal.data);
+        stmt = parser_parse_assignment(parser, &scratch);
     }
 
     return stmt;
@@ -170,6 +178,28 @@ ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* s
     };
 
     return expr;
+}
+
+ASTStatement* parser_parse_assignment(Parser* parser, Arena* scratch)
+{
+    ASTIdentifier* identifier = AST_CREATE_NODE(scratch);
+    assert(identifier);
+
+    identifier->kind = ASTK_IDENTIFIER;
+    identifier->token = parser->current_token;
+
+    // Consume both the identifier and assignment operator.
+    parser_consume_token(parser);
+    parser_consume_token(parser);
+
+    ASTAssignment* assignment = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ASTAssignment));
+    assert(assignment);
+
+    assignment->kind = ASTK_ASSIGNMENT;
+    assignment->identifier = identifier;
+    assignment->expression = cast(ASTExpression*) parser_parse_expression(parser, 0, scratch);
+
+    return cast(ASTStatement*) assignment;
 }
 
 void parser_dump_ast(Parser* parser, ASTProgram* root)

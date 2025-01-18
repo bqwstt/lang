@@ -29,36 +29,49 @@ enum ASTKind
     ASTK_BINARY,
     ASTK_STMT,
     ASTK_EXPR,
+    ASTK_IDENTIFIER,
+    ASTK_ASSIGNMENT,
 };
 typedef enum ASTKind ASTKind;
 
-// @TODO: we may want token to be a ptr
-#define ASTBase \
-    Token token; \
-    ASTKind kind;
-
+// @TODO: Check how can we make `token` a pointer?
 struct ASTNode {
-    ASTBase;
+    ASTKind kind;
+    Token token;
 };
 typedef struct ASTNode ASTNode;
 typedef struct ASTNode ASTStatement;
+typedef struct ASTNode ASTIdentifier;
+typedef struct ASTNode ASTExpression;
 
 #define MAX_STATEMENTS 1024
 struct ASTProgram
 {
     // @TODO: use arena
     uint16 statements_len;
-    ASTNode* statements[MAX_STATEMENTS];
+    ASTStatement* statements[MAX_STATEMENTS];
 };
 typedef struct ASTProgram ASTProgram;
 
 struct ASTBinaryOp
 {
-    ASTBase;
-    ASTNode* left;
-    ASTNode* right;
+    ASTKind kind;
+    Token token;
+
+    ASTExpression* left;
+    ASTExpression* right;
 };
 typedef struct ASTBinaryOp ASTBinaryOp;
+
+struct ASTAssignment
+{
+    ASTKind kind;
+    Token token;
+
+    ASTIdentifier* identifier;
+    ASTExpression* expression;
+};
+typedef struct ASTAssignment ASTAssignment;
 
 /* Helpers */
 const char* ast_get_node_id(ASTNode* node);

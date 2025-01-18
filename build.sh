@@ -4,7 +4,7 @@
 # @TODO: add support for clang
 # - Try adding -fsanitize-trap as well.
 
-COMPILER_FLAGS="-O0 -ggdb3 -Wall -Wno-unused-variable -Wno-discarded-qualifiers"
+COMPILER_FLAGS="-O0 -std=c99 -ggdb3 -Wall -Wno-unused-variable -Wno-discarded-qualifiers"
 SANITIZER_FLAGS="-fsanitize=undefined"
 INCLUDE_FLAGS="-Isrc"
 
