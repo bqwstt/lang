@@ -52,9 +52,12 @@ OperatorAssociativityType parser_operator_associativity(TokenKind op);
 
 /* Parsing functions */
 ASTStatement* parser_parse_statement(Parser* parser);
-ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* scratch);
+ASTExpression* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* scratch);
 ASTStatement* parser_parse_identifier(Parser* parser);
 ASTStatement* parser_parse_assignment(Parser* parser, Arena* scratch);
+ASTStatement* parser_parse_constant(Parser* parser, Arena* scratch);
+ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch);
+ASTNameWithType* parser_parse_name_with_type(Parser* parser, Arena* scratch);
 
 void parser_dump_ast(Parser* parser, ASTProgram* root);
 

@@ -57,7 +57,7 @@ enum TokenKind
     TK_LESS_OR_EQUALS_TO, // <=
     TK_ARRAY_BRACKETS, // []
     TK_ASSIGNMENT_OPERATOR, // :=
-    TK_DEFINITION_OPERATOR, // ::
+    TK_CONSTANT_DEFINITION_OPERATOR, // ::
     TK_LOGICAL_OR, // ||
     TK_LOGICAL_AND, // &&
 
@@ -118,7 +118,7 @@ static const char* token_names[] = {
     [TK_LESS_OR_EQUALS_TO] = "a less than or equals to sign",
     [TK_ARRAY_BRACKETS] = "an array bracket specifier",
     [TK_ASSIGNMENT_OPERATOR] = "an assignment operator",
-    [TK_DEFINITION_OPERATOR] = "a definition operator",
+    [TK_CONSTANT_DEFINITION_OPERATOR] = "a definition operator",
     [TK_LOGICAL_OR] = "a logical OR operator",
     [TK_LOGICAL_AND] = "a logical AND operator",
 

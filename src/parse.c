@@ -127,6 +127,8 @@ ASTStatement* parser_parse_statement(Parser* parser)
         stmt = parser_parse_expression(parser, 0, &scratch);
     } else if (parser->next_token.kind == TK_ASSIGNMENT_OPERATOR) {
         stmt = parser_parse_assignment(parser, &scratch);
+    } else if (parser->next_token.kind == TK_CONSTANT_DEFINITION_OPERATOR) {
+        stmt = parser_parse_constant(parser, &scratch);
     }
 
     return stmt;
@@ -177,30 +179,119 @@ ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* s
 
 ASTStatement* parser_parse_assignment(Parser* parser, Arena* scratch)
 {
-    ASTIdentifier* identifier = AST_CREATE_NODE(scratch);
-    assert(identifier);
+    // @TODO: specifying types (e.g. a: uint = 42)
+    ASTDeclaration* decl = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ASTDeclaration));
+    assert(decl);
 
-    identifier->kind = ASTK_IDENTIFIER;
-    identifier->token = parser->current_token;
-
-    ASTAssignment* assignment = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ASTAssignment));
-    assert(assignment);
-
-    assignment->kind = ASTK_ASSIGNMENT;
-    assignment->token = parser->next_token;
-
-    // Consume both the identifier and assignment operator.
-    parser_consume_token(parser);
-    parser_consume_token(parser);
-
-    assignment->identifier = identifier;
-    assignment->expression = cast(ASTExpression*) parser_parse_expression(parser, 0, scratch);
+    decl->kind = ASTK_VARIABLE_ASSIGNMENT;
+    decl->token = parser->next_token;
+    decl->variable.name_with_type = parser_parse_name_with_type(parser, scratch);
+    parser_consume_token(parser); // Consume the assignment operator.
+    decl->variable.expression = parser_parse_expression(parser, 0, scratch);
 
     // Consume the semicolon.
     // @TODO: Throw an error if the semicolon is not found.
     parser_consume_token(parser);
 
-    return cast(ASTStatement*) assignment;
+    return cast(ASTStatement*) decl;
+}
+
+ASTStatement* parser_parse_constant(Parser* parser, Arena* scratch)
+{
+    // Let's just assume what follows is a function declaration...
+    return cast(ASTStatement*) parser_parse_function(parser, scratch);
+}
+
+ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
+{
+    ASTIdentifier* name = AST_CREATE_NODE(scratch);
+    assert(name);
+
+    name->kind = ASTK_IDENTIFIER;
+    name->token = parser->current_token;
+
+    ASTDeclaration* decl = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ASTDeclaration));
+    decl->kind = ASTK_FUNCTION_DECLARATION;
+    decl->token = parser->next_token;
+
+    // @TODO: Expect parenthesis before consuming the token.
+    // Consume name + definition operator + opening parenthesis.
+    parser_consume_token(parser);
+    parser_consume_token(parser);
+    parser_consume_token(parser);
+
+    // @TODO: Make this arena part of some scope node, maybe?
+    // @TODO: Check if this arena is needed, as we already have one created in parse_statement?
+    byte* scope_arena_buffer[4096];
+    Arena scope_arena;
+    arena_initialize(&scope_arena, scope_arena_buffer, 4096);
+
+    ASTTypeSignature* signature = AST_CREATE_NODE_SIZED(&scope_arena, sizeof(ASTTypeSignature));
+
+    uint i = 0;
+    while (true) {
+        signature->parameters[i] = parser_parse_name_with_type(parser, &scope_arena);
+        // @FIXME: we can set kind in name_with_type directly maybe?
+        signature->parameters[i++]->name->kind = ASTK_FUNCTION_PARAMETER;
+
+        if (parser->current_token.kind == TK_PARENTHESIS_CLOSE) {
+            parser_consume_token(parser);
+            break;
+        }
+
+        // Consume commas.
+        parser_consume_token(parser);
+    }
+
+    // Consume the arrow.
+    parser_consume_token(parser);
+
+    ASTIdentifier* return_type = AST_CREATE_NODE(scratch);
+    return_type->kind = ASTK_FUNCTION_RETURN_TYPE;
+    return_type->token = parser->current_token;
+
+    signature->return_type = return_type;
+
+    decl->function.name = name;
+    decl->function.signature = signature;
+    decl->function.body = NULL; // @TODO: Implement body.
+
+    return decl;
+}
+
+ASTNameWithType* parser_parse_name_with_type(Parser* parser, Arena* scratch)
+{
+    ASTIdentifier* name = AST_CREATE_NODE(scratch);
+    assert(name);
+
+    name->kind = ASTK_IDENTIFIER;
+    name->token = parser->current_token;
+
+    ASTNameWithType* name_with_type = AST_CREATE_NODE_SIZED(scratch, sizeof(ASTNameWithType));
+    assert(name_with_type);
+
+    name_with_type->name = name;
+    name_with_type->type = NULL;
+
+    // Consume the name.
+    // @TODO: Also expect tokens.
+    parser_consume_token(parser);
+
+    // In case the type is specified (after colon), try to set it.
+    if (parser->current_token.kind == TK_COLON) {
+        parser_consume_token(parser);
+
+        ASTIdentifier* type = AST_CREATE_NODE(scratch);
+        assert(type);
+
+        type->kind = ASTK_IDENTIFIER;
+        type->token = parser->current_token;
+
+        parser_consume_token(parser);
+
+        name_with_type->type = type;
+    }
+    return name_with_type;
 }
 
 void parser_dump_ast(Parser* parser, ASTProgram* root)

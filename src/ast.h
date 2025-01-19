@@ -30,7 +30,10 @@ enum ASTKind
     ASTK_STMT,
     ASTK_EXPR,
     ASTK_IDENTIFIER,
-    ASTK_ASSIGNMENT,
+    ASTK_VARIABLE_ASSIGNMENT,
+    ASTK_FUNCTION_DECLARATION,
+    ASTK_FUNCTION_PARAMETER,
+    ASTK_FUNCTION_RETURN_TYPE,
 };
 typedef enum ASTKind ASTKind;
 
@@ -63,15 +66,49 @@ struct ASTBinaryOp
 };
 typedef struct ASTBinaryOp ASTBinaryOp;
 
-struct ASTAssignment
+struct ASTNameWithType
+{
+    ASTKind kind;
+    ASTIdentifier* name;
+    ASTIdentifier* type; // @TODO: Change this to a proper type?
+};
+typedef struct ASTNameWithType ASTNameWithType;
+
+struct ASTVariableDeclaration
+{
+    ASTNameWithType* name_with_type;
+    ASTExpression* expression;
+    // @TODO: Modifiers (constants etc.)
+};
+typedef struct ASTVariableDeclaration ASTVariableDeclaration;
+
+#define MAX_PARAMETERS 127
+struct ASTTypeSignature
+{
+    ASTNameWithType* parameters[MAX_PARAMETERS];
+    ASTIdentifier* return_type;
+};
+typedef struct ASTTypeSignature ASTTypeSignature;
+
+struct ASTFunctionDeclaration
+{
+    ASTIdentifier* name;
+    ASTTypeSignature* signature;
+    ASTNode* body;
+};
+typedef struct ASTFunctionDeclaration ASTFunctionDeclaration;
+
+struct ASTDeclaration
 {
     ASTKind kind;
     Token token;
 
-    ASTIdentifier* identifier;
-    ASTExpression* expression;
+    union {
+        ASTFunctionDeclaration function;
+        ASTVariableDeclaration variable;
+    };
 };
-typedef struct ASTAssignment ASTAssignment;
+typedef struct ASTDeclaration ASTDeclaration;
 
 /* Helpers */
 const char* ast_get_node_id(ASTNode* node);

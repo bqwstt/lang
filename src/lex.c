@@ -127,7 +127,7 @@ Token lexer_consume_token(Lexer* lexer)
             }
 
             if (lexer_match(lexer, ':')) {
-                token.kind = TK_DEFINITION_OPERATOR;
+                token.kind = TK_CONSTANT_DEFINITION_OPERATOR;
                 token.literal = STRING("::");
                 break;
             }
