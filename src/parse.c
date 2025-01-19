@@ -94,7 +94,7 @@ void parser_consume_token(Parser* parser)
 
 void parser_parse(Parser* parser)
 {
-    ASTProgram program = AST_CreateProgramNode();
+    ASTProgram program = ast_create_program_node();
 
     while (parser->current_token.kind != TK_EOF) {
         ASTStatement* stmt = parser_parse_statement(parser);

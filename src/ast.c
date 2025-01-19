@@ -22,7 +22,7 @@
 #define AST_CREATE_NODE(arena)           arena_alloc(arena, sizeof(ASTNode))
 #define AST_CREATE_NODE_SIZED(arena, sz) arena_alloc(arena, sz)
 
-ASTProgram AST_CreateProgramNode()
+ASTProgram ast_create_program_node()
 {
     ASTProgram program;
     program.statements_len = 0;
