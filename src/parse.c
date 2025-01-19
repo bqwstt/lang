@@ -139,7 +139,7 @@ ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* s
     // Implementation of a Pratt parser.
     // Wonderful article explaining this algorithm:
     // https://martin.janiczek.cz/2023/07/03/demystifying-pratt-parsers.html
-    ASTStatement* expr = AST_CREATE_NODE(&parser->node_arena);
+    ASTExpression* expr = AST_CREATE_NODE(&parser->node_arena);
     assert(expr);
 
     expr->kind  = ASTK_EXPR;
@@ -162,7 +162,7 @@ ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* s
         parser_consume_token(parser);
         parser_consume_token(parser);
 
-        ASTStatement* right = parser_parse_expression(parser, final_prec, scratch);
+        ASTExpression* right = parser_parse_expression(parser, final_prec, scratch);
         ASTBinaryOp* binop = AST_CREATE_NODE_SIZED(scratch, sizeof(ASTBinaryOp));
         assert(binop);
 
@@ -171,7 +171,7 @@ ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* s
         binop->right = right;
         binop->token = op_token;
 
-        expr = cast(ASTStatement*) binop;
+        expr = cast(ASTExpression*) binop;
     };
 
     return expr;
