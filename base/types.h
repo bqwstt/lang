@@ -37,5 +37,6 @@ typedef size_t size;
 #define lengthof(s) (countof(s) - 1)
 
 #define cast(X) (X)
+#define null NULL
 
 #endif // TYPES_H

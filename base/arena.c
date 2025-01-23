@@ -68,7 +68,7 @@ void* arena_alloc_aligned(Arena* arena, size sz, size align)
         return ptr;
     }
 
-    return NULL;
+    return null;
 }
 
 void* arena_alloc(Arena* arena, size sz)
@@ -80,7 +80,7 @@ void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new
     // @TODO: debug_assert(ptr_is_power_of_two(align));
     byte* old_mem = cast(byte*) old_memory;
 
-    if (old_mem == NULL || old_sz == 0) {
+    if (old_mem == null || old_sz == 0) {
         return arena_alloc_aligned(arena, new_sz, align);
     } else if (arena->buf <= old_mem && old_mem < arena->buf + arena->buf_len) {
         if (arena->buf + arena->prev_offset == old_mem) {
@@ -104,7 +104,7 @@ void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new
     } else {
         // @TODO: throw an error
         // "Memory is out of bounds of the buffer in this arena"
-        return NULL;
+        return null;
     }
 }
 

@@ -103,7 +103,7 @@ void ast_dump_node(ASTNode* node, uint8 depth, bool has_child)
 
             ASTNameWithType* next_parameter = function_decl.signature->parameters[0];
             uint i = 0;
-            while (next_parameter != NULL) {
+            while (next_parameter != null) {
                 // @TODO: dump for types
                 ast_dump_node(next_parameter->name, depth+2, false);
                 i += 1;
