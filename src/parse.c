@@ -204,6 +204,7 @@ ASTStatement* parser_parse_constant(Parser* parser, Arena* scratch)
 
 ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
 {
+    ScopedError scoped_error;
     ASTIdentifier* name = AST_CREATE_NODE(scratch);
     assert(name);
 
@@ -214,22 +215,27 @@ ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
     decl->kind = ASTK_FUNCTION_DECLARATION;
     decl->token = parser->next_token;
 
-    // @TODO: Expect parenthesis before consuming the token.
-    // Consume name + definition operator + opening parenthesis.
-    parser_consume_token(parser);
-    parser_consume_token(parser);
-    parser_consume_token(parser);
-
     // @TODO: Make this arena part of some scope node, maybe?
     // @TODO: Check if this arena is needed, as we already have one created in parse_statement?
     byte* scope_arena_buffer[4096];
     Arena scope_arena;
     arena_initialize(&scope_arena, scope_arena_buffer, 4096);
 
+    // @TODO: Expect parenthesis before consuming the token.
+    // Consume name + definition operator + opening parenthesis.
+    parser_consume_token(parser);
+    parser_consume_token(parser);
+    if (parser->current_token.kind != TK_PARENTHESIS_OPEN) {
+        error_push_scope(&scoped_error, &scope_arena, ERROR_UNEXPECTED_TOKEN, &parser->current_token);
+    }
+
+    parser_consume_token(parser);
+
     ASTTypeSignature* signature = AST_CREATE_NODE_SIZED(&scope_arena, sizeof(ASTTypeSignature));
 
     uint8 i = 0;
     while (true) {
+        // @FIXME: This does not handle functions without parameters.
         signature->parameters[i] = parser_parse_name_with_type(parser, &scope_arena);
         // @FIXME: we can set kind in name_with_type directly maybe?
         signature->parameters[i++]->name->kind = ASTK_FUNCTION_PARAMETER;
@@ -261,6 +267,7 @@ ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
     decl->function.signature = signature;
     decl->function.body = NULL; // @TODO: Implement body.
 
+    error_report_scope(&scoped_error);
     return decl;
 }
 

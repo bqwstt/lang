@@ -19,43 +19,29 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <unistd.h>
+#ifndef ERROR_H
+#define ERROR_H
 
-#include "base/types.h"
-#include "base/libc.h"
-#include "base/arena.h"
-#include "base/string.h"
-#include "base/io.h"
-
-#include "lex.h"
-#include "ast.h"
-#include "error.h"
-#include "parse.h"
-
-#include "base/arena.c"
-#include "base/string.c"
-#include "base/io.c"
-#include "lex.c"
-#include "ast.c"
-#include "error.c"
-#include "parse.c"
-
-int main(int argc, char** argv)
+enum ErrorKind
 {
-    if (argc != 2) {
-        printf("usage: ./lang <filename>\n");
-        return 1;
-    }
+    ERROR_NO_ERROR,
+    ERROR_UNEXPECTED_TOKEN,
+};
+typedef enum ErrorKind ErrorKind;
 
-    String code = io_read_file_from_path(argv[1]);
-    Lexer lexer = lexer_create(code);
-    Parser parser = parser_create(&lexer);
-    parser_parse(&parser);
-    parser_destroy(&parser);
-    return 0;
-}
+struct ScopedError
+{
+    ErrorKind error_kind;
+    Token*    token;
+
+    struct ScopedError* previous_error;
+    struct ScopedError* next_error;
+};
+typedef struct ScopedError ScopedError;
+
+ScopedError error_make_scoped();
+void error_push_scope(ScopedError* error, Arena* scratch, ErrorKind kind, Token* token);
+void error_report_scope(ScopedError* error);
+void error_report(ScopedError* error);
+
+#endif // ERROR_H
