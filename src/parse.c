@@ -226,6 +226,7 @@ ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
     parser_consume_token(parser);
     parser_consume_token(parser);
     if (parser->current_token.kind != TK_PARENTHESIS_OPEN) {
+        // @FIXME: Provide some kind of "synchronization" to skip to the next valid token.
         error_push_scope(&scoped_error, &scope_arena, ERROR_UNEXPECTED_TOKEN, &parser->current_token);
     }
 
@@ -233,9 +234,9 @@ ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
 
     ASTTypeSignature* signature = AST_CREATE_NODE_SIZED(&scope_arena, sizeof(ASTTypeSignature));
     if (parser->current_token.kind != TK_PARENTHESIS_CLOSE) {
+        // Parse parameters.
         uint8 i = 0;
         while (true) {
-            // @FIXME: This does not handle functions without parameters.
             signature->parameters[i] = parser_parse_name_with_type(parser, &scope_arena);
             // @FIXME: we can set kind in name_with_type directly maybe?
             signature->parameters[i++]->name->kind = ASTK_FUNCTION_PARAMETER;
@@ -250,7 +251,9 @@ ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
                 break;
             }
 
-            // Consume commas.
+            if (parser->current_token.kind != TK_COMMA) {
+                error_push_scope(&scoped_error, &scope_arena, ERROR_UNEXPECTED_TOKEN, &parser->current_token);
+            }
             parser_consume_token(parser);
         }
     } else {
