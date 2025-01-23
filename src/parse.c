@@ -232,25 +232,28 @@ ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
     parser_consume_token(parser);
 
     ASTTypeSignature* signature = AST_CREATE_NODE_SIZED(&scope_arena, sizeof(ASTTypeSignature));
+    if (parser->current_token.kind != TK_PARENTHESIS_CLOSE) {
+        uint8 i = 0;
+        while (true) {
+            // @FIXME: This does not handle functions without parameters.
+            signature->parameters[i] = parser_parse_name_with_type(parser, &scope_arena);
+            // @FIXME: we can set kind in name_with_type directly maybe?
+            signature->parameters[i++]->name->kind = ASTK_FUNCTION_PARAMETER;
 
-    uint8 i = 0;
-    while (true) {
-        // @FIXME: This does not handle functions without parameters.
-        signature->parameters[i] = parser_parse_name_with_type(parser, &scope_arena);
-        // @FIXME: we can set kind in name_with_type directly maybe?
-        signature->parameters[i++]->name->kind = ASTK_FUNCTION_PARAMETER;
+            if (i == MAX_PARAMETERS) {
+                // @TODO: Throw an error for missing parenthesis...?
+                break;
+            }
 
-        if (i == MAX_PARAMETERS) {
-            // @TODO: Throw an error for missing parenthesis...?
-            break;
-        }
+            if (parser->current_token.kind == TK_PARENTHESIS_CLOSE) {
+                parser_consume_token(parser);
+                break;
+            }
 
-        if (parser->current_token.kind == TK_PARENTHESIS_CLOSE) {
+            // Consume commas.
             parser_consume_token(parser);
-            break;
         }
-
-        // Consume commas.
+    } else {
         parser_consume_token(parser);
     }
 
