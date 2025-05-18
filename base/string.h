@@ -22,22 +22,22 @@
 #ifndef STRING_H
 #define STRING_H
 
-// String as mentioned in: https://nullprogram.com/blog/2023/10/08/
+// string_t as mentioned in: https://nullprogram.com/blog/2023/10/08/
 // Note that there is no distinction between "string" and "string view" here.
 
-struct String
+struct string
 {
     uint8* data;
     size   len;
 };
-typedef struct String String;
+typedef struct string string_t;
 
-#define STRING_SIZED(s, l) cast(String) {(uint8*)s, l}
-#define STRING(s)          cast(String) {(uint8*)s, lengthof(s)}
+#define STRING_SIZED(s, l) cast(string_t) {(uint8*)s, l}
+#define STRING(s)          cast(string_t) {(uint8*)s, lengthof(s)}
 
-String string_append(String string, uint8 c, Arena* arena);
-String string_clone(String string, Arena* arena);
-String string_from_char(char c, Arena* arena);
-bool string_equals(String* string1, String* string2);
+string_t STRING_Append(string_t string, uint8 c, arena_t* arena);
+string_t STRING_Clone(string_t string, arena_t* arena);
+string_t STRING_FromChar(char c, arena_t* arena);
+bool STRING_Equals(string_t* string1, string_t* string2);
 
 #endif // STRING_H

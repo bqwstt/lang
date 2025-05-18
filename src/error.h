@@ -22,26 +22,26 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-enum ErrorKind
+enum error_kind
 {
-    ERROR_NO_ERROR,
-    ERROR_UNEXPECTED_TOKEN,
+    ERRORK_NO_ERROR,
+    ERRORK_UNEXPECTED_TOKEN,
 };
-typedef enum ErrorKind ErrorKind;
+typedef enum error_kind error_kind_t;
 
-struct ScopedError
+struct scoped_error
 {
-    ErrorKind error_kind;
-    Token*    token;
+    error_kind_t error_kind;
+    token_t* token;
 
-    struct ScopedError* previous_error;
-    struct ScopedError* next_error;
+    struct scoped_error* previous_error;
+    struct scoped_error* next_error;
 };
-typedef struct ScopedError ScopedError;
+typedef struct scoped_error scoped_error_t;
 
-ScopedError error_make_scoped();
-void error_push_scope(ScopedError* error, Arena* scratch, ErrorKind kind, Token* token);
-void error_report_scope(ScopedError* error);
-void error_report(ScopedError* error);
+scoped_error_t ERROR_MakeScoped();
+void ERROR_PushScope(scoped_error_t* error, arena_t* scratch, error_kind_t kind, token_t* token);
+void ERROR_ReportScope(scoped_error_t* error);
+void ERROR_Report(scoped_error_t* error);
 
 #endif // ERROR_H

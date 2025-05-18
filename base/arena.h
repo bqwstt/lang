@@ -27,24 +27,24 @@
 
 #define DEFAULT_ARENA_ALIGNMENT (2*sizeof(void*))
 
-struct Arena
+struct arena
 {
     byte* buf;
     size buf_len;
     size prev_offset;
     size curr_offset;
 };
-typedef struct Arena Arena;
+typedef struct arena arena_t;
 
 bool ptr_is_power_of_two(uintptr x);
 
-void arena_initialize(Arena* arena, void* buffer, size buffer_length);
-void arena_free(Arena* arena);
+void ARENA_Initialize(arena_t* arena, void* buffer, size buffer_length);
+void ARENA_Free(arena_t* arena);
 
-uintptr arena_align_forward(uintptr ptr, size align);
-void* arena_alloc_aligned(Arena* arena, size sz, size align);
-void* arena_alloc(Arena* arena, size sz);
-void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new_sz, size align);
-void* arena_resize(Arena* arena, void* old_memory, size old_sz, size new_sz);
+uintptr ARENA_AlignForward(uintptr ptr, size align);
+void* ARENA_AllocAligned(arena_t* arena, size sz, size align);
+void* ARENA_Alloc(arena_t* arena, size sz);
+void* ARENA_ResizeAligned(arena_t* arena, void* old_memory, size old_sz, size new_sz, size align);
+void* ARENA_Resize(arena_t* arena, void* old_memory, size old_sz, size new_sz);
 
 #endif // ARENA_H

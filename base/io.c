@@ -19,7 +19,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-String io_read_file_from_path(const char* filename)
+string_t IO_ReadFileFromPath(const char* filename)
 {
     // @TODO: proper error checking
     int fd = open(filename, O_RDONLY);
@@ -30,7 +30,7 @@ String io_read_file_from_path(const char* filename)
     uint8* data = cast(uint8*) mmap(0, len, PROT_READ, MAP_PRIVATE, fd, 0);
     assert(data != MAP_FAILED);
 
-    String contents = STRING("");
+    string_t contents = STRING("");
     contents.data = data;
     contents.len = len-1;
     return contents;

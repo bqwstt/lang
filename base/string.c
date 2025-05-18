@@ -19,10 +19,10 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-String string_append(String string, uint8 c, Arena* arena)
+string_t STRING_Append(string_t string, uint8 c, arena_t* arena)
 {
     // @FIXME: This is not the fastest approach.
-    uint8* new_data = cast(uint8*) arena_alloc(arena, string.len+1);
+    uint8* new_data = cast(uint8*) ARENA_Alloc(arena, string.len+1);
     assert(new_data);
 
     for (size i = 0; i < string.len; ++i) {
@@ -33,9 +33,9 @@ String string_append(String string, uint8 c, Arena* arena)
     return STRING_SIZED(new_data, string.len+1);
 }
 
-String string_clone(String string, Arena* arena)
+string_t STRING_Clone(string_t string, arena_t* arena)
 {
-    uint8* new_data = cast(uint8*) arena_alloc(arena, string.len);
+    uint8* new_data = cast(uint8*) ARENA_Alloc(arena, string.len);
     assert(new_data);
 
     for (size i = 0; i < string.len; ++i) {
@@ -45,16 +45,16 @@ String string_clone(String string, Arena* arena)
     return STRING_SIZED(new_data, string.len);
 }
 
-String string_from_char(char c, Arena* arena)
+string_t STRING_FromChar(char c, arena_t* arena)
 {
-    uint8* data = cast(uint8*) arena_alloc(arena, 1);
+    uint8* data = cast(uint8*) ARENA_Alloc(arena, 1);
     assert(data);
 
     data[0] = cast(uint8) c;
     return STRING_SIZED(data, 1);
 }
 
-bool string_equals(String* string1, String* string2) {
+bool STRING_Equals(string_t* string1, string_t* string2) {
     if (string1->len != string2->len) return false;
     for (size i = 0; i < string1->len; ++i) {
         if (string1->data[i] != string2->data[i]) {

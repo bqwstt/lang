@@ -23,26 +23,26 @@
 #define PARSER_NODE_LIMIT 131072
 static byte* node_buffer[PARSER_NODE_LIMIT];
 
-Parser parser_create(Lexer* lexer)
+parser_t PARSER_Create(lexer_t* lexer)
 {
-    Arena node_arena;
-    arena_initialize(&node_arena, node_buffer, PARSER_NODE_LIMIT);
+    arena_t node_arena;
+    ARENA_Initialize(&node_arena, node_buffer, PARSER_NODE_LIMIT);
 
-    Parser parser;
+    parser_t parser;
     parser.lexer = lexer;
     parser.node_arena = node_arena;
-    parser_consume_token(&parser);
-    parser_consume_token(&parser);
+    PARSER_ConsumeToken(&parser);
+    PARSER_ConsumeToken(&parser);
     return parser;
 }
 
-void parser_destroy(Parser* parser)
+void PARSER_Destroy(parser_t* parser)
 {
-    lexer_destroy(parser->lexer);
-    arena_free(&parser->node_arena);
+    LEXER_Destroy(parser->lexer);
+    ARENA_Free(&parser->node_arena);
 }
 
-bool parser_token_kind_is_operator(TokenKind kind)
+bool PARSER_TokenKindIsOperator(token_kind_t kind)
 {
     return kind == TK_PLUS
         || kind == TK_MINUS
@@ -51,7 +51,7 @@ bool parser_token_kind_is_operator(TokenKind kind)
         || kind == TK_EXPONENT;
 }
 
-uint parser_operator_precedence(TokenKind op)
+uint PARSER_OperatorPrecedence(token_kind_t op)
 {
     // Based on Pratt's parser logic.
     switch (op) {
@@ -68,7 +68,7 @@ uint parser_operator_precedence(TokenKind op)
     }
 }
 
-OperatorAssociativityType parser_operator_associativity(TokenKind op)
+operator_associativity_type_t PARSER_OperatorAssociativity(token_kind_t op)
 {
     switch (op) {
         case TK_MINUS:
@@ -83,72 +83,72 @@ OperatorAssociativityType parser_operator_associativity(TokenKind op)
     }
 }
 
-void parser_consume_token(Parser* parser)
+void PARSER_ConsumeToken(parser_t* parser)
 {
     parser->current_token = parser->next_token;
     if (parser->current_token.kind == TK_ILLEGAL || parser->current_token.kind == TK_EOF)
         return;
 
-    parser->next_token = lexer_consume_token(parser->lexer);
+    parser->next_token = LEXER_ConsumeToken(parser->lexer);
 }
 
-void parser_parse(Parser* parser)
+void PARSER_Parse(parser_t* parser)
 {
-    ASTProgram program = ast_create_program_node();
+    ast_program_t program = AST_CreateProgramNode();
 
     while (parser->current_token.kind != TK_EOF) {
-        ASTStatement* stmt = parser_parse_statement(parser);
+        ast_statement_t* stmt = PARSER_ParseStatement(parser);
 
         if (stmt != NULL) {
             program.statements[program.statements_len++] = stmt;
         }
 
         // @TODO: we may want to reduce all tokens, not just 1?
-        parser_consume_token(parser);
+        PARSER_ConsumeToken(parser);
     }
     
-    parser_dump_ast(parser, &program);
+    PARSER_DumpAST(parser, &program);
     return;
 }
 
-ASTStatement* parser_parse_statement(Parser* parser)
+ast_statement_t* PARSER_ParseStatement(parser_t* parser)
 {
-    ASTStatement* stmt = AST_CREATE_NODE(&parser->node_arena);
+    ast_statement_t* stmt = AST_CREATE_NODE(&parser->node_arena);
     assert(stmt);
 
     stmt->kind = ASTK_STMT;
 
     // @TODO: Check if these micro allocations are a bit too much.
     byte* scratch_node_buffer[16384];
-    Arena scratch;
-    arena_initialize(&scratch, scratch_node_buffer, 16384);
+    arena_t scratch;
+    ARENA_Initialize(&scratch, scratch_node_buffer, 16384);
 
     if (parser->current_token.kind == TK_NUMBER_LITERAL) {
-        stmt = parser_parse_expression(parser, 0, &scratch);
+        stmt = PARSER_ParseExpression(parser, 0, &scratch);
     } else if (parser->next_token.kind == TK_ASSIGNMENT_OPERATOR) {
-        stmt = parser_parse_assignment(parser, &scratch);
+        stmt = PARSER_ParseAssignment(parser, &scratch);
     } else if (parser->next_token.kind == TK_CONSTANT_DEFINITION_OPERATOR) {
-        stmt = parser_parse_constant(parser, &scratch);
+        stmt = PARSER_ParseConstant(parser, &scratch);
     }
 
     return stmt;
 }
 
-ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* scratch)
+ast_statement_t* PARSER_ParseExpression(parser_t* parser, uint8 prec_limit, arena_t* scratch)
 {
     // Implementation of a Pratt parser.
     // Wonderful article explaining this algorithm:
     // https://martin.janiczek.cz/2023/07/03/demystifying-pratt-parsers.html
-    ASTExpression* expr = AST_CREATE_NODE(&parser->node_arena);
+    ast_expression_t* expr = AST_CREATE_NODE(&parser->node_arena);
     assert(expr);
 
-    expr->kind  = ASTK_EXPR;
+    expr->kind = ASTK_EXPR;
     expr->token = parser->current_token;
 
-    while (parser_token_kind_is_operator(parser->next_token.kind)) {
-        uint8 prec = parser_operator_precedence(parser->next_token.kind);
+    while (PARSER_TokenKindIsOperator(parser->next_token.kind)) {
+        uint8 prec = PARSER_OperatorPrecedence(parser->next_token.kind);
         uint8 final_prec = prec;
-        if (parser_operator_associativity(parser->next_token.kind) == ASSOC_RIGHT) {
+        if (PARSER_OperatorAssociativity(parser->next_token.kind) == ASSOC_RIGHT) {
             final_prec -= 1;
         }
 
@@ -156,14 +156,14 @@ ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* s
             return expr;
         }
 
-        Token op_token = parser->next_token;
+        token_t op_token = parser->next_token;
 
         // Consume both the number and the operator.
-        parser_consume_token(parser);
-        parser_consume_token(parser);
+        PARSER_ConsumeToken(parser);
+        PARSER_ConsumeToken(parser);
 
-        ASTExpression* right = parser_parse_expression(parser, final_prec, scratch);
-        ASTBinaryOp* binop = AST_CREATE_NODE_SIZED(scratch, sizeof(ASTBinaryOp));
+        ast_expression_t* right = PARSER_ParseExpression(parser, final_prec, scratch);
+        ast_binary_op_t* binop = AST_CREATE_NODE_SIZED(scratch, sizeof(ast_binary_op_t));
         assert(binop);
 
         binop->kind = ASTK_BINARY;
@@ -171,73 +171,73 @@ ASTStatement* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* s
         binop->right = right;
         binop->token = op_token;
 
-        expr = cast(ASTExpression*) binop;
+        expr = cast(ast_expression_t*) binop;
     };
 
     return expr;
 }
 
-ASTStatement* parser_parse_assignment(Parser* parser, Arena* scratch)
+ast_statement_t* PARSER_ParseAssignment(parser_t* parser, arena_t* scratch)
 {
     // @TODO: specifying types (e.g. a: uint = 42)
-    ASTDeclaration* decl = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ASTDeclaration));
+    ast_declaration_t* decl = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ast_declaration_t));
     assert(decl);
 
     decl->kind = ASTK_VARIABLE_ASSIGNMENT;
     decl->token = parser->next_token;
-    decl->variable.name_with_type = parser_parse_name_with_type(parser, scratch);
-    parser_consume_token(parser); // Consume the assignment operator.
-    decl->variable.expression = parser_parse_expression(parser, 0, scratch);
+    decl->variable.name_with_type = PARSER_ParseNameWithType(parser, scratch);
+    PARSER_ConsumeToken(parser); // Consume the assignment operator.
+    decl->variable.expression = PARSER_ParseExpression(parser, 0, scratch);
 
     // Consume the semicolon.
     // @TODO: Throw an error if the semicolon is not found.
-    parser_consume_token(parser);
+    PARSER_ConsumeToken(parser);
 
-    return cast(ASTStatement*) decl;
+    return cast(ast_statement_t*) decl;
 }
 
-ASTStatement* parser_parse_constant(Parser* parser, Arena* scratch)
+ast_statement_t* PARSER_ParseConstant(parser_t* parser, arena_t* scratch)
 {
     // Let's just assume what follows is a function declaration...
-    return cast(ASTStatement*) parser_parse_function(parser, scratch);
+    return cast(ast_statement_t*) PARSER_ParseFunction(parser, scratch);
 }
 
-ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
+ast_declaration_t* PARSER_ParseFunction(parser_t* parser, arena_t* scratch)
 {
-    ScopedError scoped_error;
-    ASTIdentifier* name = AST_CREATE_NODE(scratch);
+    scoped_error_t scoped_error;
+    ast_identifier_t* name = AST_CREATE_NODE(scratch);
     assert(name);
 
     name->kind = ASTK_IDENTIFIER;
     name->token = parser->current_token;
 
-    ASTDeclaration* decl = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ASTDeclaration));
+    ast_declaration_t* decl = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ast_declaration_t));
     decl->kind = ASTK_FUNCTION_DECLARATION;
     decl->token = parser->next_token;
 
     // @TODO: Make this arena part of some scope node, maybe?
     // @TODO: Check if this arena is needed, as we already have one created in parse_statement?
     byte* scope_arena_buffer[4096];
-    Arena scope_arena;
-    arena_initialize(&scope_arena, scope_arena_buffer, 4096);
+    arena_t scope_arena;
+    ARENA_Initialize(&scope_arena, scope_arena_buffer, 4096);
 
     // @TODO: Expect parenthesis before consuming the token.
     // Consume name + definition operator + opening parenthesis.
-    parser_consume_token(parser);
-    parser_consume_token(parser);
+    PARSER_ConsumeToken(parser);
+    PARSER_ConsumeToken(parser);
     if (parser->current_token.kind != TK_PARENTHESIS_OPEN) {
         // @FIXME: Provide some kind of "synchronization" to skip to the next valid token.
-        error_push_scope(&scoped_error, &scope_arena, ERROR_UNEXPECTED_TOKEN, &parser->current_token);
+        ERROR_PushScope(&scoped_error, &scope_arena, ERRORK_UNEXPECTED_TOKEN, &parser->current_token);
     }
 
-    parser_consume_token(parser);
+    PARSER_ConsumeToken(parser);
 
-    ASTTypeSignature* signature = AST_CREATE_NODE_SIZED(&scope_arena, sizeof(ASTTypeSignature));
+    ast_type_signature_t* signature = AST_CREATE_NODE_SIZED(&scope_arena, sizeof(ast_type_signature_t));
     if (parser->current_token.kind != TK_PARENTHESIS_CLOSE) {
         // Parse parameters.
         uint8 i = 0;
         while (true) {
-            signature->parameters[i] = parser_parse_name_with_type(parser, &scope_arena);
+            signature->parameters[i] = PARSER_ParseNameWithType(parser, &scope_arena);
             // @FIXME: we can set kind in name_with_type directly maybe?
             signature->parameters[i++]->name->kind = ASTK_FUNCTION_PARAMETER;
 
@@ -247,23 +247,23 @@ ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
             }
 
             if (parser->current_token.kind == TK_PARENTHESIS_CLOSE) {
-                parser_consume_token(parser);
+                PARSER_ConsumeToken(parser);
                 break;
             }
 
             if (parser->current_token.kind != TK_COMMA) {
-                error_push_scope(&scoped_error, &scope_arena, ERROR_UNEXPECTED_TOKEN, &parser->current_token);
+                ERROR_PushScope(&scoped_error, &scope_arena, ERRORK_UNEXPECTED_TOKEN, &parser->current_token);
             }
-            parser_consume_token(parser);
+            PARSER_ConsumeToken(parser);
         }
     } else {
-        parser_consume_token(parser);
+        PARSER_ConsumeToken(parser);
     }
 
     // Consume the arrow.
-    parser_consume_token(parser);
+    PARSER_ConsumeToken(parser);
 
-    ASTIdentifier* return_type = AST_CREATE_NODE(scratch);
+    ast_identifier_t* return_type = AST_CREATE_NODE(scratch);
     return_type->kind = ASTK_FUNCTION_RETURN_TYPE;
     return_type->token = parser->current_token;
 
@@ -273,19 +273,19 @@ ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch)
     decl->function.signature = signature;
     decl->function.body = NULL; // @TODO: Implement body.
 
-    error_report_scope(&scoped_error);
+    ERROR_ReportScope(&scoped_error);
     return decl;
 }
 
-ASTNameWithType* parser_parse_name_with_type(Parser* parser, Arena* scratch)
+ast_name_with_type_t* PARSER_ParseNameWithType(parser_t* parser, arena_t* scratch)
 {
-    ASTIdentifier* name = AST_CREATE_NODE(scratch);
+    ast_identifier_t* name = AST_CREATE_NODE(scratch);
     assert(name);
 
     name->kind = ASTK_IDENTIFIER;
     name->token = parser->current_token;
 
-    ASTNameWithType* name_with_type = AST_CREATE_NODE_SIZED(scratch, sizeof(ASTNameWithType));
+    ast_name_with_type_t* name_with_type = AST_CREATE_NODE_SIZED(scratch, sizeof(ast_name_with_type_t));
     assert(name_with_type);
 
     name_with_type->name = name;
@@ -293,32 +293,32 @@ ASTNameWithType* parser_parse_name_with_type(Parser* parser, Arena* scratch)
 
     // Consume the name.
     // @TODO: Also expect tokens.
-    parser_consume_token(parser);
+    PARSER_ConsumeToken(parser);
 
     // In case the type is specified (after colon), try to set it.
     if (parser->current_token.kind == TK_COLON) {
-        parser_consume_token(parser);
+        PARSER_ConsumeToken(parser);
 
-        ASTIdentifier* type = AST_CREATE_NODE(scratch);
+        ast_identifier_t* type = AST_CREATE_NODE(scratch);
         assert(type);
 
         type->kind = ASTK_IDENTIFIER;
         type->token = parser->current_token;
 
-        parser_consume_token(parser);
+        PARSER_ConsumeToken(parser);
 
         name_with_type->type = type;
     }
     return name_with_type;
 }
 
-void parser_dump_ast(Parser* parser, ASTProgram* root)
+void PARSER_DumpAST(parser_t* parser, ast_program_t* root)
 {
     printf("│[Program]\n");
     for (uint i = 0; i < root->statements_len; ++i) {
-        ASTNode* node = root->statements[i];
+        ast_node_t* node = root->statements[i];
         printf("└──│[Statement]");
-        ast_dump_node(node, 1, true);
+        AST_DumpNode(node, 1, true);
         printf("\n");
     }
 }

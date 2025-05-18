@@ -19,19 +19,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#define AST_CREATE_NODE(arena)           arena_alloc(arena, sizeof(ASTNode))
-#define AST_CREATE_NODE_SIZED(arena, sz) arena_alloc(arena, sz)
+#define AST_CREATE_NODE(arena)           ARENA_Alloc(arena, sizeof(ast_node_t))
+#define AST_CREATE_NODE_SIZED(arena, sz) ARENA_Alloc(arena, sz)
 
-ASTProgram ast_create_program_node()
+ast_program_t AST_CreateProgramNode()
 {
-    ASTProgram program;
+    ast_program_t program;
     program.statements_len = 0;
     return program;
 }
 
 // @FIXME: Maybe follow the same approach as we do for tokens,
 // where this is a plain array. Check what's faster.
-const char* ast_get_node_id(ASTNode* node)
+const char* AST_GetNodeID(ast_node_t* node)
 {
     switch (node->kind) {
         case ASTK_EXPR:
@@ -54,7 +54,7 @@ const char* ast_get_node_id(ASTNode* node)
     }
 }
 
-void ast_dump_node(ASTNode* node, uint8 depth, bool has_child)
+void AST_DumpNode(ast_node_t* node, uint8 depth, bool has_child)
 {
     if (depth > 0) {
         printf("\n");
@@ -64,9 +64,9 @@ void ast_dump_node(ASTNode* node, uint8 depth, bool has_child)
         }
 
         if (has_child) {
-            printf("└──│[%s] ", ast_get_node_id(node));
+            printf("└──│[%s] ", AST_GetNodeID(node));
         } else {
-            printf("└───[%s] ", ast_get_node_id(node));
+            printf("└───[%s] ", AST_GetNodeID(node));
         }
     }
 
@@ -75,42 +75,42 @@ void ast_dump_node(ASTNode* node, uint8 depth, bool has_child)
         case ASTK_IDENTIFIER:
         case ASTK_FUNCTION_PARAMETER:
         case ASTK_FUNCTION_RETURN_TYPE: {
-            String literal = node->token.literal;
+            string_t literal = node->token.literal;
             printf("%s", literal.data);
             break;
         }
         case ASTK_BINARY: {
-            ASTBinaryOp* binop = cast(ASTBinaryOp*) node;
+            ast_binary_op_t* binop = cast(ast_binary_op_t*) node;
             const char* op = cast(const char*) binop->token.literal.data;
-            ast_dump_node(binop->left, 0, false);
+            AST_DumpNode(binop->left, 0, false);
             printf(" %s ", op);
-            ast_dump_node(binop->right, 0, false);
+            AST_DumpNode(binop->right, 0, false);
             break;
         }
         case ASTK_VARIABLE_ASSIGNMENT: {
-            ASTDeclaration* decl = cast(ASTDeclaration*) node;
-            ASTVariableDeclaration variable_decl = cast(ASTVariableDeclaration) decl->variable;
-            ast_dump_node(variable_decl.name_with_type->name, depth+1, false);
+            ast_declaration_t* decl = cast(ast_declaration_t*) node;
+            ast_variable_declaration_t variable_decl = cast(ast_variable_declaration_t) decl->variable;
+            AST_DumpNode(variable_decl.name_with_type->name, depth+1, false);
             // @TODO:
-            // ast_dump_node(assignment->name_with_type->type, depth+1, false);
-            ast_dump_node(variable_decl.expression, depth+1, false);
+            // AST_DumpNode(assignment->name_with_type->type, depth+1, false);
+            AST_DumpNode(variable_decl.expression, depth+1, false);
             break;
         }
         case ASTK_FUNCTION_DECLARATION: {
-            ASTDeclaration* decl = cast(ASTDeclaration*) node;
-            ASTFunctionDeclaration function_decl = cast(ASTFunctionDeclaration) decl->function;
-            ast_dump_node(function_decl.name, depth+1, true);
+            ast_declaration_t* decl = cast(ast_declaration_t*) node;
+            ast_function_declaration_t function_decl = cast(ast_function_declaration_t) decl->function;
+            AST_DumpNode(function_decl.name, depth+1, true);
 
-            ASTNameWithType* next_parameter = function_decl.signature->parameters[0];
+            ast_name_with_type_t* next_parameter = function_decl.signature->parameters[0];
             uint i = 0;
             while (next_parameter != null) {
                 // @TODO: dump for types
-                ast_dump_node(next_parameter->name, depth+2, false);
+                AST_DumpNode(next_parameter->name, depth+2, false);
                 i += 1;
                 next_parameter = function_decl.signature->parameters[i];
             }
 
-            ast_dump_node(function_decl.signature->return_type, depth+1, false);
+            AST_DumpNode(function_decl.signature->return_type, depth+1, false);
             break;
         }
         default:

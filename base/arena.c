@@ -24,7 +24,7 @@ bool ptr_is_power_of_two(uintptr x)
     return (x & (x-1)) == 0;
 }
 
-void arena_initialize(Arena* arena, void* buffer, size buffer_length)
+void ARENA_Initialize(arena_t* arena, void* buffer, size buffer_length)
 {
     arena->buf = cast(byte*) buffer;
     arena->buf_len = buffer_length;
@@ -32,13 +32,13 @@ void arena_initialize(Arena* arena, void* buffer, size buffer_length)
     arena->prev_offset = 0;
 }
 
-void arena_free(Arena* arena)
+void ARENA_Free(arena_t* arena)
 {
     arena->curr_offset = 0;
     arena->prev_offset = 0;
 }
 
-uintptr arena_align_forward(uintptr ptr, size align)
+uintptr ARENA_AlignForward(uintptr ptr, size align)
 {
     // @TODO: debug_assert(ptr_is_power_of_two(align));
     uintptr p = ptr;
@@ -52,10 +52,10 @@ uintptr arena_align_forward(uintptr ptr, size align)
     return p;
 }
 
-void* arena_alloc_aligned(Arena* arena, size sz, size align)
+void* ARENA_AllocAligned(arena_t* arena, size sz, size align)
 {
     uintptr curr_ptr = cast(uintptr) arena->buf + cast(uintptr) arena->curr_offset;
-    uintptr offset = arena_align_forward(curr_ptr, align);
+    uintptr offset = ARENA_AlignForward(curr_ptr, align);
     offset -= cast(uintptr) arena->buf;
 
     // Check for space left
@@ -71,17 +71,17 @@ void* arena_alloc_aligned(Arena* arena, size sz, size align)
     return null;
 }
 
-void* arena_alloc(Arena* arena, size sz)
+void* ARENA_Alloc(arena_t* arena, size sz)
 {
-    return arena_alloc_aligned(arena, sz, DEFAULT_ARENA_ALIGNMENT);
+    return ARENA_AllocAligned(arena, sz, DEFAULT_ARENA_ALIGNMENT);
 }
 
-void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new_sz, size align) {
+void* ARENA_ResizeAligned(arena_t* arena, void* old_memory, size old_sz, size new_sz, size align) {
     // @TODO: debug_assert(ptr_is_power_of_two(align));
     byte* old_mem = cast(byte*) old_memory;
 
     if (old_mem == null || old_sz == 0) {
-        return arena_alloc_aligned(arena, new_sz, align);
+        return ARENA_AllocAligned(arena, new_sz, align);
     } else if (arena->buf <= old_mem && old_mem < arena->buf + arena->buf_len) {
         if (arena->buf + arena->prev_offset == old_mem) {
             arena->curr_offset = arena->prev_offset + new_sz;
@@ -91,7 +91,7 @@ void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new
 
             return old_memory;
         } else {
-            void* new_memory = arena_alloc_aligned(arena, new_sz, align);
+            void* new_memory = ARENA_AllocAligned(arena, new_sz, align);
             size_t copy_sz = 0;
             if (old_sz < new_sz)
                 copy_sz = old_sz;
@@ -108,6 +108,6 @@ void* arena_resize_aligned(Arena* arena, void* old_memory, size old_sz, size new
     }
 }
 
-void* arena_resize(Arena* arena, void* old_memory, size old_sz, size new_sz) {
-    return arena_resize_aligned(arena, old_memory, old_sz, new_sz, DEFAULT_ARENA_ALIGNMENT);
+void* ARENA_Resize(arena_t* arena, void* old_memory, size old_sz, size new_sz) {
+    return ARENA_ResizeAligned(arena, old_memory, old_sz, new_sz, DEFAULT_ARENA_ALIGNMENT);
 }

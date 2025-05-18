@@ -22,7 +22,7 @@
 #ifndef AST_H
 #define AST_H
 
-enum ASTKind
+enum ast_kind
 {
     ASTK_UNKNOWN,
 
@@ -35,83 +35,83 @@ enum ASTKind
     ASTK_FUNCTION_PARAMETER,
     ASTK_FUNCTION_RETURN_TYPE,
 };
-typedef enum ASTKind ASTKind;
+typedef enum ast_kind ast_kind_t;
 
 // @TODO: Check how can we make `token` a pointer?
-struct ASTNode {
-    ASTKind kind;
-    Token token;
+struct ast_node {
+    ast_kind_t kind;
+    token_t token;
 };
-typedef struct ASTNode ASTNode;
-typedef struct ASTNode ASTStatement;
-typedef struct ASTNode ASTIdentifier;
-typedef struct ASTNode ASTExpression;
+typedef struct ast_node ast_node_t;
+typedef struct ast_node ast_statement_t;
+typedef struct ast_node ast_identifier_t;
+typedef struct ast_node ast_expression_t;
 
 #define MAX_STATEMENTS 1024
-struct ASTProgram
+struct ast_program
 {
     // @TODO: use arena
     uint16 statements_len;
-    ASTStatement* statements[MAX_STATEMENTS];
+    ast_statement_t* statements[MAX_STATEMENTS];
 };
-typedef struct ASTProgram ASTProgram;
+typedef struct ast_program ast_program_t;
 
-struct ASTBinaryOp
+struct ast_binary_op
 {
-    ASTKind kind;
-    Token token;
+    ast_kind_t kind;
+    token_t token;
 
-    ASTExpression* left;
-    ASTExpression* right;
+    ast_expression_t* left;
+    ast_expression_t* right;
 };
-typedef struct ASTBinaryOp ASTBinaryOp;
+typedef struct ast_binary_op ast_binary_op_t;
 
-struct ASTNameWithType
+struct ast_name_with_type
 {
-    ASTKind kind;
-    ASTIdentifier* name;
-    ASTIdentifier* type; // @TODO: Change this to a proper type?
+    ast_kind_t kind;
+    ast_identifier_t* name;
+    ast_identifier_t* type; // @TODO: Change this to a proper type?
 };
-typedef struct ASTNameWithType ASTNameWithType;
+typedef struct ast_name_with_type ast_name_with_type_t;
 
-struct ASTVariableDeclaration
+struct ast_variable_declaration
 {
-    ASTNameWithType* name_with_type;
-    ASTExpression* expression;
+    ast_name_with_type_t* name_with_type;
+    ast_expression_t* expression;
     // @TODO: Modifiers (constants etc.)
 };
-typedef struct ASTVariableDeclaration ASTVariableDeclaration;
+typedef struct ast_variable_declaration ast_variable_declaration_t;
 
 #define MAX_PARAMETERS 127
-struct ASTTypeSignature
+struct ast_type_signature
 {
-    ASTNameWithType* parameters[MAX_PARAMETERS];
-    ASTIdentifier* return_type;
+    ast_name_with_type_t* parameters[MAX_PARAMETERS];
+    ast_identifier_t* return_type;
 };
-typedef struct ASTTypeSignature ASTTypeSignature;
+typedef struct ast_type_signature ast_type_signature_t;
 
-struct ASTFunctionDeclaration
+struct ast_function_declaration
 {
-    ASTIdentifier* name;
-    ASTTypeSignature* signature;
-    ASTNode* body;
+    ast_identifier_t* name;
+    ast_type_signature_t* signature;
+    ast_node_t* body;
 };
-typedef struct ASTFunctionDeclaration ASTFunctionDeclaration;
+typedef struct ast_function_declaration ast_function_declaration_t;
 
-struct ASTDeclaration
+struct ast_declaration
 {
-    ASTKind kind;
-    Token token;
+    ast_kind_t kind;
+    token_t token;
 
     union {
-        ASTFunctionDeclaration function;
-        ASTVariableDeclaration variable;
+        ast_function_declaration_t function;
+        ast_variable_declaration_t variable;
     };
 };
-typedef struct ASTDeclaration ASTDeclaration;
+typedef struct ast_declaration ast_declaration_t;
 
 /* Helpers */
-const char* ast_get_node_id(ASTNode* node);
-void ast_dump_node(ASTNode* node, uint8 depth, bool has_child);
+const char* AST_GetNodeID(ast_node_t* node);
+void AST_DumpNode(ast_node_t* node, uint8 depth, bool has_child);
 
 #endif // AST_H

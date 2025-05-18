@@ -22,43 +22,43 @@
 #ifndef PARSE_H
 #define PARSE_H
 
-struct Parser
+struct parser
 {
-    Lexer* lexer;
-    Arena node_arena;
+    lexer_t* lexer;
+    arena_t node_arena;
 
-    Token current_token;
-    Token next_token;
+    token_t current_token;
+    token_t next_token;
 };
-typedef struct Parser Parser;
+typedef struct parser parser_t;
 
-enum OperatorAssociativityType
+enum operator_associativity_type
 {
     ASSOC_UNKNOWN,
     ASSOC_RIGHT,
     ASSOC_LEFT,
 };
-typedef enum OperatorAssociativityType OperatorAssociativityType;
+typedef enum operator_associativity_type operator_associativity_type_t;
 
-Parser parser_create(Lexer* lexer);
-void   parser_destroy(Parser* parser);
-void   parser_consume_token(Parser* parser);
-void   parser_parse(Parser* parser);
+parser_t PARSER_Create(lexer_t* lexer);
+void PARSER_Destroy(parser_t* parser);
+void PARSER_ConsumeToken(parser_t* parser);
+void PARSER_Parse(parser_t* parser);
 
 /* Helpers */
-bool parser_token_kind_is_operator(TokenKind kind);
-uint parser_operator_precedence(TokenKind op);
-OperatorAssociativityType parser_operator_associativity(TokenKind op);
+bool PARSER_TokenKindIsOperator(token_kind_t kind);
+uint PARSER_OperatorPrecedence(token_kind_t op);
+operator_associativity_type_t PARSER_OperatorAssociativity(token_kind_t op);
 
 /* Parsing functions */
-ASTStatement* parser_parse_statement(Parser* parser);
-ASTExpression* parser_parse_expression(Parser* parser, uint8 prec_limit, Arena* scratch);
-ASTStatement* parser_parse_identifier(Parser* parser);
-ASTStatement* parser_parse_assignment(Parser* parser, Arena* scratch);
-ASTStatement* parser_parse_constant(Parser* parser, Arena* scratch);
-ASTDeclaration* parser_parse_function(Parser* parser, Arena* scratch);
-ASTNameWithType* parser_parse_name_with_type(Parser* parser, Arena* scratch);
+ast_statement_t* PARSER_ParseStatement(parser_t* parser);
+ast_expression_t* PARSER_ParseExpression(parser_t* parser, uint8 prec_limit, arena_t* scratch);
+ast_statement_t* PARSER_ParseIdentifier(parser_t* parser);
+ast_statement_t* PARSER_ParseAssignment(parser_t* parser, arena_t* scratch);
+ast_statement_t* PARSER_ParseConstant(parser_t* parser, arena_t* scratch);
+ast_declaration_t* PARSER_ParseFunction(parser_t* parser, arena_t* scratch);
+ast_name_with_type_t* PARSER_ParseNameWithType(parser_t* parser, arena_t* scratch);
 
-void parser_dump_ast(Parser* parser, ASTProgram* root);
+void PARSER_DumpAST(parser_t* parser, ast_program_t* root);
 
 #endif // PARSE_H

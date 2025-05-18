@@ -22,7 +22,7 @@
 #ifndef LEX_H
 #define LEX_H
 
-enum TokenKind
+enum token_kind
 {
     TK_UNKNOWN,
 
@@ -82,7 +82,7 @@ enum TokenKind
     TK_ILLEGAL,
     TK_EOF,
 };
-typedef enum TokenKind TokenKind;
+typedef enum token_kind token_kind_t;
 
 static const char* token_names[] = {
     [TK_UNKNOWN] = "an unknown symbol",
@@ -140,39 +140,38 @@ static const char* token_names[] = {
     [TK_ILLEGAL] = "an illegal token",
 };
 
-struct Token
+struct token
 {
-    TokenKind kind; 
-    String literal;
+    token_kind_t kind; 
+    string_t literal;
     // @TODO: remove these and use a pointer to location instead
     uint column;
     uint line;
 };
-typedef struct Token Token;
+typedef struct token token_t;
 
-struct Lexer
+struct lexer
 {
+    char current;
     uint64 cur_pos;
     uint64 next_pos;
 
-    Arena literal_arena;
+    string_t code;
 
-    char current;
-
-    String code;
+    arena_t literal_arena;
 };
-typedef struct Lexer Lexer;
+typedef struct lexer lexer_t;
 
-void token_dump(Token* token);
+void TOKEN_Dump(token_t* token);
 
-Lexer lexer_create(String code);
-void  lexer_destroy(Lexer* lexer);
-char  lexer_peek(Lexer* lexer);
-void  lexer_read_char(Lexer* lexer);
-bool  lexer_match(Lexer* lexer, char character);
+lexer_t LEXER_Create(string_t code);
+void LEXER_Destroy(lexer_t* lexer);
+char LEXER_Peek(lexer_t* lexer);
+void LEXER_ReadChar(lexer_t* lexer);
+bool LEXER_Match(lexer_t* lexer, char character);
 
-Token lexer_consume_token(Lexer* lexer);
-Token lexer_consume_number(Lexer* lexer);
-Token lexer_consume_string(Lexer* lexer);
+token_t LEXER_ConsumeToken(lexer_t* lexer);
+token_t LEXER_ConsumeNumber(lexer_t* lexer);
+token_t LEXER_ConsumeString(lexer_t* lexer);
 
 #endif // LEX_H
