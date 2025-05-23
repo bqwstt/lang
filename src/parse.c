@@ -127,6 +127,9 @@ ast_statement_t* PARSER_ParseStatement(parser_t* parser)
         stmt = PARSER_ParseExpression(parser, 0, &scratch);
     } else if (parser->next_token.kind == TK_ASSIGNMENT_OPERATOR) {
         stmt = PARSER_ParseAssignment(parser, &scratch);
+    } else if (parser->next_token.kind == TK_FUN) {
+        // @FIXME: We should separate "statements" from "declarations".
+        stmt = cast(ast_statement_t*) PARSER_ParseFunction(parser, &scratch);
     }
 
     return stmt;
@@ -177,9 +180,11 @@ ast_statement_t* PARSER_ParseExpression(parser_t* parser, uint8 prec_limit, aren
 
 ast_statement_t* PARSER_ParseAssignment(parser_t* parser, arena_t* scratch)
 {
-    // @TODO: specifying types (e.g. a: uint = 42)
+    // @TODO: specifying types (e.g. var a: uint = 42)
     ast_declaration_t* decl = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ast_declaration_t));
     assert(decl);
+
+    // @TODO: Check if `var` is present.
 
     decl->kind = ASTK_VARIABLE_ASSIGNMENT;
     decl->token = parser->next_token;
@@ -196,16 +201,24 @@ ast_statement_t* PARSER_ParseAssignment(parser_t* parser, arena_t* scratch)
 
 ast_declaration_t* PARSER_ParseFunction(parser_t* parser, arena_t* scratch)
 {
+    // fun [(StructName)] functionName([args...]) -> returnType { [body] }
     scoped_error_t scoped_error;
+    ast_node_t* fun_keyword = AST_CREATE_NODE(scratch);
+    assert(fun_keyword);
+
+    fun_keyword->kind = ASTK_KEYWORD;
+    fun_keyword->token = parser->current_token;
+
+    // @TODO: Check for possible struct tag after keyword.
+
     ast_identifier_t* name = AST_CREATE_NODE(scratch);
     assert(name);
 
     name->kind = ASTK_IDENTIFIER;
-    name->token = parser->current_token;
+    name->token = parser->next_token;
 
     ast_declaration_t* decl = AST_CREATE_NODE_SIZED(&parser->node_arena, sizeof(ast_declaration_t));
     decl->kind = ASTK_FUNCTION_DECLARATION;
-    decl->token = parser->next_token;
 
     // @TODO: Make this arena part of some scope node, maybe?
     // @TODO: Check if this arena is needed, as we already have one created in parse_statement?
@@ -214,15 +227,15 @@ ast_declaration_t* PARSER_ParseFunction(parser_t* parser, arena_t* scratch)
     ARENA_Initialize(&scope_arena, scope_arena_buffer, 4096);
 
     // @TODO: Expect parenthesis before consuming the token.
-    // Consume name + definition operator + opening parenthesis.
-    PARSER_ConsumeToken(parser);
-    PARSER_ConsumeToken(parser);
+    // Consume function keyword + name + opening parenthesis.
+    PARSER_ConsumeToken(parser); // `fun`
+    PARSER_ConsumeToken(parser); // functionName @TODO: or struct tag.
     if (parser->current_token.kind != TK_PARENTHESIS_OPEN) {
         // @FIXME: Provide some kind of "synchronization" to skip to the next valid token.
         ERROR_PushScope(&scoped_error, &scope_arena, ERRORK_UNEXPECTED_TOKEN, &parser->current_token);
     }
 
-    PARSER_ConsumeToken(parser);
+    PARSER_ConsumeToken(parser); // `(`
 
     ast_type_signature_t* signature = AST_CREATE_NODE_SIZED(&scope_arena, sizeof(ast_type_signature_t));
     if (parser->current_token.kind != TK_PARENTHESIS_CLOSE) {
@@ -239,21 +252,21 @@ ast_declaration_t* PARSER_ParseFunction(parser_t* parser, arena_t* scratch)
             }
 
             if (parser->current_token.kind == TK_PARENTHESIS_CLOSE) {
-                PARSER_ConsumeToken(parser);
+                PARSER_ConsumeToken(parser); // `)`
                 break;
             }
 
             if (parser->current_token.kind != TK_COMMA) {
                 ERROR_PushScope(&scoped_error, &scope_arena, ERRORK_UNEXPECTED_TOKEN, &parser->current_token);
             }
-            PARSER_ConsumeToken(parser);
+            PARSER_ConsumeToken(parser); // `,`
         }
     } else {
-        PARSER_ConsumeToken(parser);
+        PARSER_ConsumeToken(parser); // `)`
     }
 
-    // Consume the arrow.
-    PARSER_ConsumeToken(parser);
+    // Consume the return type arrow.
+    PARSER_ConsumeToken(parser); // `->`
 
     ast_identifier_t* return_type = AST_CREATE_NODE(scratch);
     return_type->kind = ASTK_FUNCTION_RETURN_TYPE;

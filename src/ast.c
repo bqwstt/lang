@@ -41,6 +41,8 @@ const char* AST_GetNodeID(ast_node_t* node)
             return "Statement";
         case ASTK_IDENTIFIER:
             return "Identifier";
+        case ASTK_KEYWORD:
+            return "Keyword";
         case ASTK_VARIABLE_ASSIGNMENT:
             return "Assignment";
         case ASTK_FUNCTION_DECLARATION:
@@ -73,6 +75,7 @@ void AST_DumpNode(ast_node_t* node, uint8 depth, bool has_child)
     switch (node->kind) {
         case ASTK_EXPR:
         case ASTK_IDENTIFIER:
+        case ASTK_KEYWORD:
         case ASTK_FUNCTION_PARAMETER:
         case ASTK_FUNCTION_RETURN_TYPE: {
             string_t literal = node->token.literal;
@@ -91,7 +94,7 @@ void AST_DumpNode(ast_node_t* node, uint8 depth, bool has_child)
             ast_declaration_t* decl = cast(ast_declaration_t*) node;
             ast_variable_declaration_t variable_decl = cast(ast_variable_declaration_t) decl->variable;
             AST_DumpNode(variable_decl.name_with_type->name, depth+1, false);
-            // @TODO:
+            // @TODO: Dump the type of the variable.
             // AST_DumpNode(assignment->name_with_type->type, depth+1, false);
             AST_DumpNode(variable_decl.expression, depth+1, false);
             break;

@@ -133,6 +133,8 @@ static const char* token_names[] = {
     [TK_ELSE] = "an else keyword",
     [TK_RETURN] = "a return keyword",
     [TK_FOR] = "a for keyword",
+    [TK_VAR] = "a variable keyword",
+    [TK_FUN] = "a function keyword",
 
     [TK_IDENTIFIER] = "an identifier",
 
