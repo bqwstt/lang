@@ -37,7 +37,7 @@ enum token_kind
     TK_COLON, // :
     TK_SEMICOLON, // ;
     TK_QUESTION_MARK, // ?
-    TK_EXCLAMATION_MARK, // !
+    TK_BACKTICK, // `
     TK_EQUALS, // =
     TK_GREATER_THAN, // >
     TK_LESS_THAN, // <
@@ -57,13 +57,13 @@ enum token_kind
     TK_LESS_OR_EQUALS_TO, // <=
     TK_ARRAY_BRACKETS, // []
     TK_ASSIGNMENT_OPERATOR, // :=
-    TK_CONSTANT_DEFINITION_OPERATOR, // ::
     TK_LOGICAL_OR, // ||
     TK_LOGICAL_AND, // &&
 
     // @TODO: +=, -= etc.
     // @TODO: Maybe we should have a dereference operator for both `*` and `?` types.
     // @TODO: Should we have a "todo" symbol? Maybe `...`...?
+    // @TODO: Exception handling? Will we `throw` stuff...?
 
     // Literals
     TK_NUMBER_LITERAL,
@@ -76,6 +76,8 @@ enum token_kind
     TK_ELSE,
     TK_RETURN,
     TK_FOR,
+    TK_VAR,
+    TK_FUN,
 
     TK_IDENTIFIER,
 
@@ -98,7 +100,6 @@ static const char* token_names[] = {
     [TK_COLON] = "a colon",
     [TK_SEMICOLON] = "a semicolon",
     [TK_QUESTION_MARK] = "a question mark",
-    [TK_EXCLAMATION_MARK] = "an exclamation mark",
     [TK_EQUALS] = "an equals sign",
     [TK_GREATER_THAN] = "a greater than sign",
     [TK_LESS_THAN] = "a less than sign",
@@ -118,7 +119,6 @@ static const char* token_names[] = {
     [TK_LESS_OR_EQUALS_TO] = "a less than or equals to sign",
     [TK_ARRAY_BRACKETS] = "an array bracket specifier",
     [TK_ASSIGNMENT_OPERATOR] = "an assignment operator",
-    [TK_CONSTANT_DEFINITION_OPERATOR] = "a definition operator",
     [TK_LOGICAL_OR] = "a logical OR operator",
     [TK_LOGICAL_AND] = "a logical AND operator",
 

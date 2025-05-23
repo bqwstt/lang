@@ -126,12 +126,6 @@ token_t LEXER_ConsumeToken(lexer_t* lexer)
                 break;
             }
 
-            if (LEXER_Match(lexer, ':')) {
-                token.kind = TK_CONSTANT_DEFINITION_OPERATOR;
-                token.literal = STRING("::");
-                break;
-            }
-
             token.kind = TK_COLON;
             token.literal = STRING(":");
             break;
@@ -165,10 +159,6 @@ token_t LEXER_ConsumeToken(lexer_t* lexer)
                 token.literal = STRING("!=");
                 break;
             }
-
-            token.kind = TK_EXCLAMATION_MARK;
-            token.literal = STRING("!");
-            break;
         case '=':
             if (LEXER_Match(lexer, '=')) {
                 token.kind = TK_DOUBLE_EQUALS;
@@ -284,8 +274,7 @@ token_t LEXER_ConsumeString(lexer_t* lexer)
     token_t token;
     token.kind = TK_IDENTIFIER;
 
-    // @TODO: This may be a hashmap.
-    // But for now, it works.
+    // @PERFORMANCE: This may be a hashmap. But for now, it works.
     if (0) {}
     else if (STRING_Equals(&identifier, &STRING("struct"))) { token.kind = TK_STRUCT; }
     else if (STRING_Equals(&identifier, &STRING("enum")))   { token.kind = TK_ENUM; }
@@ -293,6 +282,8 @@ token_t LEXER_ConsumeString(lexer_t* lexer)
     else if (STRING_Equals(&identifier, &STRING("else")))   { token.kind = TK_ELSE; }
     else if (STRING_Equals(&identifier, &STRING("return"))) { token.kind = TK_RETURN; }
     else if (STRING_Equals(&identifier, &STRING("for")))    { token.kind = TK_FOR; }
+    else if (STRING_Equals(&identifier, &STRING("var")))    { token.kind = TK_VAR; }
+    else if (STRING_Equals(&identifier, &STRING("fun")))    { token.kind = TK_FUN; }
 
     token.literal = identifier;
     return token;

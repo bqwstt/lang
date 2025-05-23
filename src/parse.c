@@ -127,8 +127,6 @@ ast_statement_t* PARSER_ParseStatement(parser_t* parser)
         stmt = PARSER_ParseExpression(parser, 0, &scratch);
     } else if (parser->next_token.kind == TK_ASSIGNMENT_OPERATOR) {
         stmt = PARSER_ParseAssignment(parser, &scratch);
-    } else if (parser->next_token.kind == TK_CONSTANT_DEFINITION_OPERATOR) {
-        stmt = PARSER_ParseConstant(parser, &scratch);
     }
 
     return stmt;
@@ -194,12 +192,6 @@ ast_statement_t* PARSER_ParseAssignment(parser_t* parser, arena_t* scratch)
     PARSER_ConsumeToken(parser);
 
     return cast(ast_statement_t*) decl;
-}
-
-ast_statement_t* PARSER_ParseConstant(parser_t* parser, arena_t* scratch)
-{
-    // Let's just assume what follows is a function declaration...
-    return cast(ast_statement_t*) PARSER_ParseFunction(parser, scratch);
 }
 
 ast_declaration_t* PARSER_ParseFunction(parser_t* parser, arena_t* scratch)
